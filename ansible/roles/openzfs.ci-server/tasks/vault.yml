@@ -1,0 +1,115 @@
+---
+- name: assert supported distribution
+  assert:
+    that:
+      - ansible_distribution == 'Ubuntu'
+
+- name: create ZFS dataset for vault
+  zfs:
+    name: "zfs/vault"
+    state: present
+
+- name: install vault dependencies
+  apt:
+    name: '{{ item }}'
+  with_items:
+   - unzip
+
+- name: download vault package
+  get_url:
+    url: 'https://releases.hashicorp.com/vault/{{ vault_version }}/vault_{{ vault_version }}_linux_amd64.zip'
+    checksum: 'sha256:{{ vault_checksum }}'
+    dest: /tmp/vault.zip
+
+- name: create vault directory
+  file:
+    dest: '/opt/vault-{{ vault_version }}'
+    owner: root
+    group: root
+    state: directory
+
+- name: unarchive vault package
+  unarchive:
+    src: /tmp/vault.zip
+    dest: '/opt/vault-{{ vault_version }}'
+    owner: root
+    group: root
+    mode: 0755
+    copy: no
+
+- name: copy vault openzfsci policy file
+  copy:
+    dest: '/opt/vault-{{ vault_version }}/openzfsci-policy.hcl'
+    owner: root
+    group: root
+    mode: 0644
+    content: |
+      path "secret/openzfsci/*" {
+        policy = "read"
+      }
+
+- name: copy vault configuration file
+  copy:
+    dest: '/opt/vault-{{ vault_version }}/config.hcl'
+    owner: root
+    group: root
+    mode: 0644
+    content: |
+      disable_mlock = true
+      backend "file" {
+        path = "/zfs/vault"
+      }
+
+      /*
+       * This allows us to log in to the server, and run vault directly to
+       * perform any configure we may need to do (e.g. write, unseal, etc).
+       */
+      listener "tcp" {
+        address = "127.0.0.1:8200"
+        tls_disable = 1
+      }
+
+      /*
+       * This gives the docker containers that will be running on this
+       * host, access to the vault service from within the container.
+       */
+      listener "tcp" {
+        address = "172.17.0.1:8200"
+        tls_disable = 1
+      }
+
+- name: copy vault server script
+  copy:
+    dest: '/opt/vault-{{ vault_version }}/vault-server'
+    owner: root
+    group: root
+    mode: 0755
+    content: |
+      #!/bin/sh
+      export GOMAXPROCS=$(nproc)
+      /opt/vault/vault server -config=/opt/vault/config.hcl
+
+- name: copy vault systemd service file
+  copy:
+    dest: /etc/systemd/system/vault.service
+    owner: root
+    group: root
+    mode: 0755
+    content: |
+      [Unit]
+      Description=OpenZFS Vault Server
+      After=network.target
+
+      [Service]
+      ExecStart=/opt/vault/vault-server
+
+      [Install]
+      WantedBy=default.target
+
+- name: configure vault symlink
+  file:
+    src: '/opt/vault-{{ vault_version }}'
+    dest: /opt/vault
+    owner: root
+    group: root
+    state: link

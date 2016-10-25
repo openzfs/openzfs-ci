@@ -1,0 +1,4 @@
+---
+- src: https://github.com/angstwad/docker.ubuntu
+  name: angstwad.docker_ubuntu
+  version: v1.1.7

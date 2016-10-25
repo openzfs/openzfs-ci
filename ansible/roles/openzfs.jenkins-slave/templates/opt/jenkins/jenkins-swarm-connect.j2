@@ -1,0 +1,16 @@
+#!/bin/bash
+
+/usr/bin/java \
+    -jar "{{ jenkins_bin }}/swarm-client.jar" \
+    -name "{{ jenkins_name }}" \
+    -fsroot "{{ jenkins_fsroot }}" \
+    -master "{{ jenkins_master }}" \
+    -labels "{{ jenkins_label }}" \
+    -username "{{ jenkins_username }}" \
+    -password "{{ jenkins_password }}" \
+    -executors "{{ jenkins_executors }}" \
+    -mode "exclusive" \
+    -disableClientsUniqueId \
+    -deleteExistingClients \
+    1>"{{ jenkins_log }}/swarm-client.log" \
+    2>"{{ jenkins_log }}/swarm-client.err" &

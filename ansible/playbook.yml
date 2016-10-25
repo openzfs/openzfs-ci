@@ -1,0 +1,21 @@
+---
+#
+# Ubuntu 16.04 doesn't come pre-installed with python2, so we must
+# bootstrap these systems and install python before attempting to apply
+# any other roles or tasks; python2 being required by Ansible.
+#
+- hosts: all
+  gather_facts: false
+  become: true
+  become_user: root
+  tasks:
+   - name: install python
+     raw: >
+       test -e /usr/bin/python || \
+       (apt -y update && apt install -y python-minimal)
+
+- hosts: openzfs-ci-server
+  become: true
+  become_user: root
+  roles:
+    - { role: openzfs.ci-server }

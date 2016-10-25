@@ -1,0 +1,94 @@
+---
+- name: ensure the staff group is present
+  group:
+    name: staff
+    state: present
+
+#
+# The "user" module of Ansible doesn't work for LDAP users, so we don't
+# use it here, and instead use "become_user" as a workaround.
+#
+- name: ensure the jenkins user is present
+  command: "echo jenkins user exists"
+  become: true
+  become_user: jenkins
+  changed_when: false
+
+- name: ensure jenkins user has password-less sudo access
+  lineinfile:
+    dest: /etc/sudoers.d/jenkins
+    line: "jenkins ALL=(ALL) NOPASSWD: ALL"
+    owner: root
+    group: root
+    mode: 0644
+    create: true
+
+- name: disable ssh host key checking
+  blockinfile:
+    dest: /etc/ssh/ssh_config
+    block: |
+      Host *
+        StrictHostKeyChecking no
+        UserKnownHostsFile /dev/null
+
+- name: create jenkins directories
+  file:
+    path: "{{ item }}"
+    owner: jenkins
+    group: staff
+    state: directory
+    mode: 0755
+  with_items:
+    - "{{ jenkins_bin }}"
+    - "{{ jenkins_log }}"
+    - "{{ jenkins_fsroot }}"
+
+#
+# We store a local copy of the swarm client in the repository to eliminate
+# our dependency from the upstream source. The file was downloaded from:
+#
+#     https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/swarm-client/2.2/swarm-client-2.2-jar-with-dependencies.jar
+#
+- name: copy swarm client
+  copy:
+    src: opt/jenkins/swarm-client.jar
+    dest: "{{ jenkins_bin }}/swarm-client.jar"
+    owner: jenkins
+    group: staff
+    mode: 0644
+
+- name: copy jenkins swarm connect script
+  template:
+    src: opt/jenkins/jenkins-swarm-connect.j2
+    dest: "{{ jenkins_bin }}/jenkins-swarm-connect"
+    mode: 0755
+    owner: jenkins
+    group: staff
+  when: jenkins_name is defined
+
+- name: create SMF service manifest for swarm client
+  template:
+    src: var/svc/manifest/application/jenkins-swarm-client.xml.j2
+    dest: /var/svc/manifest/application/jenkins-swarm-client.xml
+    mode: 0444
+    owner: root
+    group: root
+  when: jenkins_name is defined and ansible_system == "SunOS"
+
+- name: import swarm client service and connect to Jenkins master
+  command: >
+    /usr/sbin/svccfg import
+    /var/svc/manifest/application/jenkins-swarm-client.xml
+  when: jenkins_name is defined and ansible_system == "SunOS"
+
+- name: enable the swarm service for the life of the system
+  command: "/usr/sbin/svcadm enable -trs jenkins-swarm-client"
+  when: jenkins_name is defined and ansible_system == "SunOS"
+
+- name: execute jenkins swarm connect script
+  become: true
+  become_user: jenkins
+  command: "{{ jenkins_bin }}/jenkins-swarm-connect"
+  async: 604800
+  poll: 0
+  when: jenkins_name is defined and ansible_system != "SunOS"

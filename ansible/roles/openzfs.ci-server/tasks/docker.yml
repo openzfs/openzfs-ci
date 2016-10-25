@@ -1,0 +1,124 @@
+---
+#
+# Note, we rely on the "angstwad.docker_ubuntu" dependency to ensure the
+# docker package is installed and properly configured. As a result, we
+# don't do any package installation or configuration in this file.
+#
+
+- name: create docker group
+  group:
+    name: docker
+    system: yes
+
+- name: add docker groups to specified users
+  user:
+    name: "{{ item }}"
+    append: yes
+    groups: docker
+  with_items: "{{ docker_users }}"
+  when: docker_users is defined
+
+#
+# We should also verify the "host-data" dataset is being mounted on
+# /var/lib/docker, and the docker deamon properly detects it and uses
+# the ZFS backend. For now, this is manually configured on the server.
+#
+- name: create docker dataset(s) for conatiners
+  zfs:
+    name: 'zfs/{{ item }}'
+    state: present
+  with_items:
+    - 'docker'
+    - 'docker/host-data'
+    - 'docker/jenkins-master'
+    - 'docker/jenkins-master-devel'
+
+- name: checkout master branch of opezfs-ci repository
+  git:
+    repo: http://github.com/openzfs/openzfs-ci.git
+    dest: /opt/openzfs-ci/master
+    version: master
+    update: yes
+
+- name: build docker images
+  command: "./scripts/docker/{{ item }}"
+  args:
+    chdir: /opt/openzfs-ci/master
+  with_items:
+    - build-master.sh
+
+- name: checkout devel branch of opezfs-ci repository
+  git:
+    repo: http://github.com/openzfs/openzfs-ci.git
+    dest: /opt/openzfs-ci/devel
+    version: devel
+    update: yes
+
+- name: build docker images
+  command: "./scripts/docker/{{ item }}"
+  args:
+    chdir: /opt/openzfs-ci/devel
+  with_items:
+    - build-master-devel.sh
+
+#
+# The jenkins-master container will run the Jenkins process using 1000
+# as the UID for the running process. Thus, we need to properly
+# configure the container's storage such that the Jenkins process will
+# have sufficient privileges to modify files in this dataset.
+#
+- name: configure permissions for docker dataset(s)
+  file:
+    dest: /zfs/docker/jenkins-master
+    owner: 1000
+    group: 1000
+    mode: 0755
+    state: directory
+
+#
+# This depends on the docker image already being built and loaded on the
+# server that will run this contianer. We don't yet build and publish
+# these images to any docker image registry, so we don't have a way to
+# pull down this image if it doesn't already exist on the system.
+#
+- name: create and run jenkins-master container
+  docker:
+    name: jenkins-master
+    image: openzfs/jenkins-master
+    state: started
+    restart_policy: always
+    ports:
+      - 8080:8080
+      - 50000:50000
+    expose:
+      - 8080
+      - 50000
+    volumes:
+      - /zfs/docker/jenkins-master:/var/jenkins_home
+    env:
+      JENKINS_URL: "http://{{ inventory_hostname }}:8080"
+      JENKINS_SLAVE_AGENT_PORT: 50000
+      OPENZFSCI_PRODUCTION: yes
+      OPENZFSCI_REPOSITORY: openzfs/openzfs-ci
+      OPENZFSCI_BRANCH: master
+
+- name: create and run jenkins-master-devel container
+  docker:
+    name: jenkins-master-devel
+    image: openzfs/jenkins-master-devel
+    state: started
+    restart_policy: always
+    ports:
+      - 8081:8080
+      - 50001:50001
+    expose:
+      - 8080
+      - 50001
+    volumes:
+      - /zfs/docker/jenkins-master-devel:/var/jenkins_home
+    env:
+      JENKINS_URL: "http://{{ inventory_hostname }}:8081"
+      JENKINS_SLAVE_AGENT_PORT: 50001
+      OPENZFSCI_PRODUCTION: no
+      OPENZFSCI_REPOSITORY: openzfs/openzfs-ci
+      OPENZFSCI_BRANCH: devel

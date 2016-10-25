@@ -1,0 +1,9 @@
+---
+jenkins_bin: /opt/jenkins
+jenkins_log: /var/jenkins/log
+jenkins_fsroot: /var/jenkins/fsroot
+jenkins_master: http://jenkins.example.com
+jenkins_label: jenkins-slave
+jenkins_password: password
+jenkins_username: username
+jenkins_executors: 1
