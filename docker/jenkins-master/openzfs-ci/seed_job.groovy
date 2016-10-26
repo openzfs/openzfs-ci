@@ -3,6 +3,10 @@ job('seed-job') {
         github('openzfs/openzfs-ci', 'master', 'https')
     }
 
+    triggers {
+        scm('@hourly')
+    }
+
     steps {
         dsl {
             external('jenkins/jobs/*.groovy')
