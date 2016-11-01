@@ -33,6 +33,8 @@ summary = {
 #
 known = {
     'acl/nontrivial/zfs_acl_chmod_inherit_003_pos': 'FAIL',
+    'bootfs/bootfs_006_pos': 'FAIL',
+    'bootfs/bootfs_008_neg': 'FAIL',
     'cache/cache_010_neg': 'FAIL',
     'casenorm/insensitive_formd_delete': 'FAIL',
     'casenorm/insensitive_none_delete': 'FAIL',
@@ -41,12 +43,14 @@ known = {
     'casenorm/sensitive_formd_delete': 'FAIL',
     'cli_root/zfs_property/zfs_written_property_001_pos': 'FAIL',
     'cli_root/zfs_snapshot/zfs_snapshot_009_pos': 'FAIL',
+    'cli_root/zpool_clear/zpool_clear_001_pos': 'FAIL',
     'cli_root/zpool_expand/zpool_expand_001_pos': 'FAIL',
     'cli_root/zpool_get/zpool_get_002_pos': 'FAIL',
     'inheritance/inherit_001_pos': 'FAIL',
     'mdb/mdb_001_pos': 'FAIL',
     'refreserv/refreserv_004_pos': 'FAIL',
     'rootpool/rootpool_002_neg': 'FAIL',
+    'rootpool/rootpool_007_neg': 'FAIL',
     'redundancy/redundancy_001_pos': 'FAIL',
     'redundancy/redundancy_002_pos': 'FAIL',
     'redundancy/redundancy_003_pos': 'FAIL',
