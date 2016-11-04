@@ -16,7 +16,7 @@ pipelineJob('00-regression-tests') {
         stringParam('OPENZFS_COMMIT_BASE')
         stringParam('OPENZFS_PULL_NUMBER')
 
-        choiceParam('COMMIT_STATUS_ENABLED', ['yes', 'no'])
+        choiceParam('COMMIT_STATUS_ENABLED', ['no', 'yes'])
     }
 
     environmentVariables {

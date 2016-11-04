@@ -16,7 +16,7 @@ pipelineJob('get-illumos-commits') {
         stringParam('DIRECTORY', 'illumos')
     }
 
-    if (System.getenv('OPENZFSCI_PRODUCTION')) {
+    if (System.getenv('OPENZFSCI_PRODUCTION').toBoolean()) {
         triggers {
             scm('@daily')
         }

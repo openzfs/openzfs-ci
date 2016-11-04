@@ -18,14 +18,18 @@ pipelineJob('get-pull-requests') {
         choiceParam('TESTS_ENABLED', ['yes', 'no'])
     }
 
-    if (System.getenv('OPENZFSCI_PRODUCTION')) {
+    if (System.getenv('OPENZFSCI_PRODUCTION').toBoolean()) {
         triggers {
             cron('H/5 * * * *')
         }
     }
 
     environmentVariables {
-        env('COMMIT_STATUS_ENABLED', 'yes')
+        if (System.getenv('OPENZFSCI_PRODUCTION').toBoolean()) {
+            env('COMMIT_STATUS_ENABLED', 'yes')
+        } else {
+            env('COMMIT_STATUS_ENABLED', 'no')
+        }
     }
 
     definition {

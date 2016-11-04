@@ -16,14 +16,18 @@ pipelineJob('get-openzfs-commits') {
         stringParam('DIRECTORY', 'openzfs')
     }
 
-    if (System.getenv('OPENZFSCI_PRODUCTION')) {
+    if (System.getenv('OPENZFSCI_PRODUCTION').toBoolean()) {
         triggers {
             scm('@hourly')
         }
     }
 
     environmentVariables {
-        env('COMMIT_STATUS_ENABLED', 'yes')
+        if (System.getenv('OPENZFSCI_PRODUCTION').toBoolean()) {
+            env('COMMIT_STATUS_ENABLED', 'yes')
+        } else {
+            env('COMMIT_STATUS_ENABLED', 'no')
+        }
     }
 
     definition {
