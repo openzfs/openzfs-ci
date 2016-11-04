@@ -21,7 +21,7 @@ pipelineJob('00-regression-tests') {
 
     environmentVariables {
         env('DCENTER_HOST', 'dcenter')
-        env('DCENTER_IMAGE', 'omnios-r151018')
+        env('DCENTER_IMAGE', 'omnios-r151020')
         env('DCENTER_EXPIRATION', '1')
     }
 
