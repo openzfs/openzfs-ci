@@ -37,6 +37,7 @@
       - pkg:/library/python-2/python-extra-26
       - pkg:/developer/versioning/git
       - pkg:/system/test/zfstest
+      - pkg:/system/test/fio
   register: result
   until: not result|failed
   retries: 10
