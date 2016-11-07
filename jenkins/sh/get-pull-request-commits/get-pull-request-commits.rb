@@ -83,7 +83,7 @@ end
 
 def username_in_approved_organization?(client, username)
     APPROVAL_ORGS.each do |org|
-        if client.organization_public_member?(org, username)
+        if client.organization_member?(org, username)
             return true
         end
     end
