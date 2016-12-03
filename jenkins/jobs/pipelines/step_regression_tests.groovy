@@ -182,7 +182,8 @@ try {
                 ])
 
                 post_job_status(job, '09-zloop', "Run of 'zloop' for commit ${OPENZFS_COMMIT_SHORT} has finished.")
-                post_remote_job_test_results(job, '09-zloop-results', 'zloop')
+                post_remote_job_test_results(job, '09-zloop-results', 'zloop', '/var/tmp/test_results')
+                post_remote_job_test_logfile(job, '09-zloop-logfile', 'zloop', '/var/tmp/test_results/ztest.out')
                 error_if_job_result_not_success(job)
             }, 'zfstest': {
                 create_commit_status('10-zfstest', 'pending',
@@ -197,7 +198,8 @@ try {
                 ])
 
                 post_job_status(job, '10-zfstest', "Run of 'zfstest' for commit ${OPENZFS_COMMIT_SHORT} has finished.")
-                post_remote_job_test_results(job, '10-zfstest-results', 'zfstest')
+                post_remote_job_test_results(job, '10-zfstest-results', 'zfstest', '/var/tmp/test_results')
+                post_remote_job_test_logfile(job, '10-zfstest-logfile', 'zfstest', '/var/tmp/test_results/*/log')
                 error_if_job_result_not_success(job)
             })
         }
@@ -244,13 +246,23 @@ def error_if_job_result_not_success(job) {
         error("build #${build_number} of job '${job_name}' failed.")
 }
 
-def post_remote_job_test_results(job, context, name) {
+def post_remote_job_test_results(job, context, name, directory) {
     try {
         create_commit_status(context, 'pending', "Upload results for '${name}' in progress.")
-        def url = upload_remote_job_test_results(job)
+        def url = upload_remote_job_test_results(job, directory)
         create_commit_status(context, 'success', "Upload results for '${name}' was successful.", url)
     } catch (e) {
         create_commit_status(context, 'failure', "Upload results for '${name}' failed.")
+    }
+}
+
+def post_remote_job_test_logfile(job, context, name, logfile) {
+    try {
+        create_commit_status(context, 'pending', "Upload logfile for '${name}' in progress.")
+        def url = upload_remote_job_test_logfile(job, logfile)
+        create_commit_status(context, 'success', "Upload logfile for '${name}' was successful.", url)
+    } catch (e) {
+        create_commit_status(context, 'failure', "Upload logfile for '${name}' failed.")
     }
 }
 
@@ -294,7 +306,7 @@ def upload_job_console(job) {
     }
 }
 
-def upload_remote_job_test_results(job) {
+def upload_remote_job_test_results(job, directory) {
     node('master') {
         unstash(name: 'openzfs-ci')
         def common = load("${OPENZFSCI_DIRECTORY}/jenkins/jobs/pipelines/library/common.groovy")
@@ -308,10 +320,31 @@ def upload_remote_job_test_results(job) {
                 ['DCENTER_HOST', env.DCENTER_HOST],
                 ['DCENTER_GUEST', job.rawBuild.environment.get('NODE_NAME')],
                 ['DCENTER_IMAGE', env.DCENTER_IMAGE],
-                ['REMOTE_DIRECTORY', '/var/tmp/test_results'],
+                ['REMOTE_DIRECTORY', directory],
             ])
         }
     }
 }
+
+def upload_remote_job_test_logfile(job, logfile) {
+    node('master') {
+        unstash(name: 'openzfs-ci')
+        def common = load("${OPENZFSCI_DIRECTORY}/jenkins/jobs/pipelines/library/common.groovy")
+
+        retry(count: 3) {
+            return common.openzfscish(OPENZFSCI_DIRECTORY, 'upload-remote-logfile-to-manta', true, [
+                ['REPOSITORY', OPENZFS_REPOSITORY],
+                ['COMMIT', OPENZFS_COMMIT],
+                ['PULL_NUMBER', OPENZFS_PULL_NUMBER],
+                ['JOB_NAME', job.projectName],
+                ['DCENTER_HOST', env.DCENTER_HOST],
+                ['DCENTER_GUEST', job.rawBuild.environment.get('NODE_NAME')],
+                ['DCENTER_IMAGE', env.DCENTER_IMAGE],
+                ['REMOTE_LOGFILE', logfile],
+            ])
+        }
+    }
+}
+
 
 // vim: tabstop=4 softtabstop=4 shiftwidth=4 expandtab textwidth=112 colorcolumn=120

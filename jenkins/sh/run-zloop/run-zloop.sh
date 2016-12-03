@@ -4,7 +4,8 @@ source ${SH_LIBRARY_PATH}/common.sh
 
 check_env ENABLE_WATCHPOINTS RUN_TIME
 
-DIR=$(dirname ${BASH_SOURCE[0]})
+RELATIVE_DIR=$(log_must dirname ${BASH_SOURCE[0]})
+ABSOLUTE_DIR=$(log_must readlink -f "$RELATIVE_DIR")
 
 if [[ "$ENABLE_WATCHPOINTS" == "yes" ]]; then
     export ZFS_DEBUG="watch"
@@ -12,7 +13,10 @@ else
     export ZFS_DEBUG=""
 fi
 
-${DIR}/zloop.sh -t $RUN_TIME -c /var/tmp/test_results -f /var/tmp/test_results
+log_must mkdir /var/tmp/test_results
+log_must cd /var/tmp/test_results
+
+${ABSOLUTE_DIR}/zloop.sh -t $RUN_TIME -c . -f .
 result=$?
 
 if [[ $result -ne 0 ]]; then
