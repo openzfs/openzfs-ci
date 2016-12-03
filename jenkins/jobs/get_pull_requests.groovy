@@ -12,7 +12,7 @@ pipelineJob('get-pull-requests') {
         stringParam('OPENZFSCI_BRANCH', System.getenv('OPENZFSCI_BRANCH'))
         stringParam('OPENZFSCI_DIRECTORY', 'openzfs-ci')
 
-        stringParam('OPENZFS_REPOSITORY', 'openzfs/openzfs')
+        stringParam('OPENZFS_REPOSITORY', 'prakashsurya/openzfs')
 
         choiceParam('PULL_REQUEST_VARIANT', ['head', 'merge', 'all'])
         choiceParam('TESTS_ENABLED', ['yes', 'no'])
@@ -28,7 +28,7 @@ pipelineJob('get-pull-requests') {
         if (System.getenv('OPENZFSCI_PRODUCTION').toBoolean()) {
             env('COMMIT_STATUS_ENABLED', 'yes')
         } else {
-            env('COMMIT_STATUS_ENABLED', 'no')
+            env('COMMIT_STATUS_ENABLED', 'yes')
         }
     }
 
