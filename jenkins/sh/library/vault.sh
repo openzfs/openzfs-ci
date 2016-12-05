@@ -72,10 +72,16 @@ function vault_read_ssh_password_dcenter_image
     vault read -field=value secret/openzfsci/dcenter-images/$1/password
 }
 
-function vault_read_manta_url
+function vault_read_manta_https
 {
     [[ -z "$VAULT_TOKEN" ]] && vault_setup_environment
-    vault read -field=value secret/openzfsci/manta/url
+    vault read -field=value secret/openzfsci/manta/https
+}
+
+function vault_read_manta_http
+{
+    [[ -z "$VAULT_TOKEN" ]] && vault_setup_environment
+    vault read -field=value secret/openzfsci/manta/http
 }
 
 function vault_read_manta_user

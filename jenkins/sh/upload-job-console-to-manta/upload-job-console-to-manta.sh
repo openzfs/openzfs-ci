@@ -22,7 +22,8 @@ function get_build_console
     log_must pup --pre 'pre[class="console-output"]'
 }
 
-export MANTA_URL=$(vault_read_manta_url)
+export MANTA_URL=$(vault_read_manta_https)
+export MANTA_HTTP=$(vault_read_manta_http)
 export MANTA_USER=$(vault_read_manta_user)
 export MANTA_KEY_ID=$(vault_read_manta_keyid)
 
@@ -65,9 +66,9 @@ if [[ -n "$PULL_NUMBER" ]]; then
     log_must mmkdir -p "/$PULLS_DIRECTORY"
     log_must mln "/$COMMITS_DIRECTORY/$FILE" "/$PULLS_DIRECTORY/$FILE"
 
-    echo "$MANTA_URL/$PULLS_DIRECTORY/$FILE"
+    echo "$MANTA_HTTP/$PULLS_DIRECTORY/$FILE"
 else
-    echo "$MANTA_URL/$COMMITS_DIRECTORY/$FILE"
+    echo "$MANTA_HTTP/$COMMITS_DIRECTORY/$FILE"
 fi
 
 # vim: tabstop=4 softtabstop=4 shiftwidth=4 expandtab textwidth=72 colorcolumn=80
