@@ -1,9 +1,10 @@
 #!/bin/bash
 
-source ${SH_LIBRARY_PATH}/common.sh
-source ${SH_LIBRARY_PATH}/vault.sh
+source "${SH_LIBRARY_PATH}/common.sh"
+source "${SH_LIBRARY_PATH}/vault.sh"
+source "${SH_LIBRARY_PATH}/manta.sh"
 
-check_env JENKINS_URL JOB_NAME BUILD_NUMBER REPOSITORY COMMIT
+check_env JENKINS_URL JOB_NAME BUILD_NUMBER COMMIT_DIRECTORY
 
 function get_build_result
 {
@@ -22,21 +23,8 @@ function get_build_console
     log_must pup --pre 'pre[class="console-output"]'
 }
 
-export MANTA_URL=$(vault_read_manta_https)
-export MANTA_HTTP=$(vault_read_manta_http)
-export MANTA_USER=$(vault_read_manta_user)
-export MANTA_KEY_ID=$(vault_read_manta_keyid)
-
 export HOME=$PWD
-
-log_must mkdir -p $HOME/.ssh
-log_must chmod 700 $HOME/.ssh
-
-log_must vault_read_manta_private_key > $HOME/.ssh/id_rsa
-log_must chmod 400 $HOME/.ssh/id_rsa
-
-log_must vault_read_manta_public_key > $HOME/.ssh/id_rsa.pub
-log_must chmod 644 $HOME/.ssh/id_rsa
+manta_setup_environment
 
 JOB_RESULT=$(get_build_result)
 while [[ -z "$JOB_RESULT" || "$JOB_RESULT" = "null" ]]; do
@@ -56,19 +44,13 @@ get_build_console > "$FILE"
 # size of the file after it is created.
 #
 log_must test -s "$FILE"
+log_must mput -f "$FILE" "/$COMMIT_DIRECTORY/$FILE"
 
-COMMITS_DIRECTORY="$MANTA_USER/public/$REPOSITORY/commit/$COMMIT"
-log_must mmkdir -p "/$COMMITS_DIRECTORY"
-log_must mput -f "$FILE" "/$COMMITS_DIRECTORY/$FILE"
-
-if [[ -n "$PULL_NUMBER" ]]; then
-    PULLS_DIRECTORY="$MANTA_USER/public/$REPOSITORY/pull/$PULL_NUMBER"
-    log_must mmkdir -p "/$PULLS_DIRECTORY"
-    log_must mln "/$COMMITS_DIRECTORY/$FILE" "/$PULLS_DIRECTORY/$FILE"
-
-    echo "$MANTA_HTTP/$PULLS_DIRECTORY/$FILE"
+if [[ -n "$PULL_DIRECTORY" ]]; then
+    log_must mln "/$COMMIT_DIRECTORY/$FILE" "/$PULL_DIRECTORY/$FILE"
+    echo "$MANTA_HTTP/$PULL_DIRECTORY/$FILE"
 else
-    echo "$MANTA_HTTP/$COMMITS_DIRECTORY/$FILE"
+    echo "$MANTA_HTTP/$COMMIT_DIRECTORY/$FILE"
 fi
 
 # vim: tabstop=4 softtabstop=4 shiftwidth=4 expandtab textwidth=72 colorcolumn=80

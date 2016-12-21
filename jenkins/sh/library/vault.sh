@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ${SH_LIBRARY_PATH}/common.sh
+source "${SH_LIBRARY_PATH}/common.sh"
 
 function vault_setup_environment
 {

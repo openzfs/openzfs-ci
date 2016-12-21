@@ -29,6 +29,9 @@ node('master') {
 try {
     create_commit_status(env.JOB_NAME, 'pending', "OpenZFS testing of commit ${OPENZFS_COMMIT_SHORT} in progress.")
 
+    def commit_directory = create_commit_directory_on_manta()
+    def pull_directory = create_pull_directory_on_manta()
+
     try {
         stage('create-builder') {
             create_commit_status('01-create-builder', 'pending', 'Creation of the build machine in progress.')
@@ -42,7 +45,8 @@ try {
                 [$class: 'StringParameterValue', name: 'BUILDER', value: BUILDER],
             ])
 
-            post_job_status(job, '01-create-builder', 'Creation of the build machine has finished.')
+            post_job_status(job, commit_directory, pull_directory, '01-create-builder',
+                'Creation of the build machine has finished.')
             error_if_job_result_not_success(job)
         }
 
@@ -62,7 +66,8 @@ try {
 
             env.BUILDER_WORKSPACE = job.rawBuild.environment.get('WORKSPACE')
 
-            post_job_status(job, '02-checkout', "Checkout of commit ${OPENZFS_COMMIT_SHORT} has finished.")
+            post_job_status(job, commit_directory, pull_directory, '02-checkout',
+                "Checkout of commit ${OPENZFS_COMMIT_SHORT} has finished.")
             error_if_job_result_not_success(job)
         }
 
@@ -80,7 +85,8 @@ try {
                     nodeEligibility: [$class: 'AllNodeEligibility']],
             ])
 
-            post_job_status(job, '03-build', "Build of commit ${OPENZFS_COMMIT_SHORT} has finished.")
+            post_job_status(job, commit_directory, pull_directory, '03-build',
+                "Build of commit ${OPENZFS_COMMIT_SHORT} has finished.")
             error_if_job_result_not_success(job)
         }
 
@@ -96,7 +102,8 @@ try {
                     nodeEligibility: [$class: 'AllNodeEligibility']],
             ])
 
-            post_job_status(job, '04-nits', "Checking nits of commit ${OPENZFS_COMMIT_SHORT} has finished.")
+            post_job_status(job, commit_directory, pull_directory, '04-nits',
+                "Checking nits of commit ${OPENZFS_COMMIT_SHORT} has finished.")
             error_if_job_result_not_success(job)
         }
 
@@ -111,7 +118,8 @@ try {
                     nodeEligibility: [$class: 'AllNodeEligibility']],
             ])
 
-            post_job_status(job, '05-install', "Installation of commit ${OPENZFS_COMMIT_SHORT} has finished.")
+            post_job_status(job, commit_directory, pull_directory, '05-install',
+                "Installation of commit ${OPENZFS_COMMIT_SHORT} has finished.")
             error_if_job_result_not_success(job)
         }
     } finally {
@@ -127,7 +135,8 @@ try {
                 [$class: 'StringParameterValue', name: 'BUILDER', value: BUILDER],
             ])
 
-            post_job_status(job, '06-unregister-builder', 'Unregistration of the build machine has finished.')
+            post_job_status(job, commit_directory, pull_directory, '06-unregister-builder',
+                'Unregistration of the build machine has finished.')
             error_if_job_result_not_success(job)
         }
     }
@@ -144,7 +153,8 @@ try {
             [$class: 'StringParameterValue', name: 'BUILDER_SNAPSHOT', value: BUILDER_SNAPSHOT],
         ])
 
-        post_job_status(job, '07-snapshot-builder', 'Snapshotting the build machine has finished.')
+        post_job_status(job, commit_directory, pull_directory, '07-snapshot-builder',
+            'Snapshotting the build machine has finished.')
         error_if_job_result_not_success(job)
     }
 
@@ -164,7 +174,8 @@ try {
                 [$class: 'StringParameterValue', name: 'ZFSTEST_TESTER', value: ZFSTEST_TESTER],
             ])
 
-            post_job_status(job, '08-create-testers', 'Creation of the test machines has finished.')
+            post_job_status(job, commit_directory, pull_directory, '08-create-testers',
+                'Creation of the test machines has finished.')
             error_if_job_result_not_success(job)
         }
 
@@ -181,9 +192,12 @@ try {
                         nodeEligibility: [$class: 'AllNodeEligibility']],
                 ])
 
-                post_job_status(job, '09-zloop', "Run of 'zloop' for commit ${OPENZFS_COMMIT_SHORT} has finished.")
-                post_remote_job_test_results(job, '09-zloop-results', 'zloop', '/var/tmp/test_results')
-                post_remote_job_test_logfile(job, '09-zloop-logfile', 'zloop', '/var/tmp/test_results/ztest.out')
+                post_job_status(job, commit_directory, pull_directory, '09-zloop',
+                    "Run of 'zloop' for commit ${OPENZFS_COMMIT_SHORT} has finished.")
+                post_remote_job_test_results(job,
+                    commit_directory, pull_directory, '09-zloop-results', 'zloop', '/var/tmp/test_results')
+                post_remote_job_test_logfile(job,
+                    commit_directory, pull_directory, '09-zloop-logfile', 'zloop', '/var/tmp/test_results/ztest.out')
                 error_if_job_result_not_success(job)
             }, 'zfstest': {
                 create_commit_status('10-zfstest', 'pending',
@@ -197,9 +211,12 @@ try {
                         nodeEligibility: [$class: 'AllNodeEligibility']],
                 ])
 
-                post_job_status(job, '10-zfstest', "Run of 'zfstest' for commit ${OPENZFS_COMMIT_SHORT} has finished.")
-                post_remote_job_test_results(job, '10-zfstest-results', 'zfstest', '/var/tmp/test_results')
-                post_remote_job_test_logfile(job, '10-zfstest-logfile', 'zfstest', '/var/tmp/test_results/*/log')
+                post_job_status(job, commit_directory, pull_directory, '10-zfstest',
+                    "Run of 'zfstest' for commit ${OPENZFS_COMMIT_SHORT} has finished.")
+                post_remote_job_test_results(job,
+                    commit_directory, pull_directory, '10-zfstest-results', 'zfstest', '/var/tmp/test_results')
+                post_remote_job_test_logfile(job,
+                    commit_directory, pull_directory, '10-zfstest-logfile', 'zfstest', '/var/tmp/test_results/*/log')
                 error_if_job_result_not_success(job)
             })
         }
@@ -217,7 +234,8 @@ try {
                 [$class: 'StringParameterValue', name: 'ZFSTEST_TESTER', value: ZFSTEST_TESTER],
             ])
 
-            post_job_status(job, '11-unregister-testers', 'Unregistration of the test machines has finished.')
+            post_job_status(job, commit_directory, pull_directory, '11-unregister-testers',
+                'Unregistration of the test machines has finished.')
             error_if_job_result_not_success(job)
         }
     }
@@ -228,8 +246,8 @@ try {
     throw e
 }
 
-def post_job_status(job, context, description) {
-    def url = upload_job_console(job)
+def post_job_status(job, commit_directory, pull_directory, context, description) {
+    def url = upload_job_console(job, commit_directory, pull_directory)
 
     def state = 'failure'
     if (job.result == 'SUCCESS')
@@ -246,24 +264,53 @@ def error_if_job_result_not_success(job) {
         error("build #${build_number} of job '${job_name}' failed.")
 }
 
-def post_remote_job_test_results(job, context, name, directory) {
+def post_remote_job_test_results(job, commit_directory, pull_directory, context, name, remote_directory) {
     try {
         create_commit_status(context, 'pending', "Upload results for '${name}' in progress.")
-        def url = upload_remote_job_test_results(job, directory)
+        def url = upload_remote_job_test_results(job, commit_directory, pull_directory, remote_directory)
         create_commit_status(context, 'success', "Upload results for '${name}' was successful.", url)
     } catch (e) {
         create_commit_status(context, 'failure', "Upload results for '${name}' failed.")
     }
 }
 
-def post_remote_job_test_logfile(job, context, name, logfile) {
+def post_remote_job_test_logfile(job, commit_directory, pull_directory, context, name, logfile) {
     try {
         create_commit_status(context, 'pending', "Upload logfile for '${name}' in progress.")
-        def url = upload_remote_job_test_logfile(job, logfile)
+        def url = upload_remote_job_test_logfile(job, commit_directory, pull_directory, logfile)
         create_commit_status(context, 'success', "Upload logfile for '${name}' was successful.", url)
     } catch (e) {
         create_commit_status(context, 'failure', "Upload logfile for '${name}' failed.")
     }
+}
+
+def create_commit_directory_on_manta() {
+    node('master') {
+        unstash(name: 'openzfs-ci')
+        def common = load("${OPENZFSCI_DIRECTORY}/jenkins/jobs/pipelines/library/common.groovy")
+
+        return common.openzfscish(OPENZFSCI_DIRECTORY, 'create-commit-directory-on-manta', true, [
+            ['REPOSITORY', OPENZFS_REPOSITORY],
+            ['COMMIT', OPENZFS_COMMIT],
+        ]).trim()
+    }
+
+}
+
+def create_pull_directory_on_manta() {
+    if (!OPENZFS_PULL_NUMBER)
+        return null
+
+    node('master') {
+        unstash(name: 'openzfs-ci')
+        def common = load("${OPENZFSCI_DIRECTORY}/jenkins/jobs/pipelines/library/common.groovy")
+
+        return common.openzfscish(OPENZFSCI_DIRECTORY, 'create-pull-directory-on-manta', true, [
+            ['REPOSITORY', OPENZFS_REPOSITORY],
+            ['PULL_NUMBER', OPENZFS_PULL_NUMBER],
+        ]).trim()
+    }
+
 }
 
 def create_commit_status(context, state, description, url = null) {
@@ -285,7 +332,7 @@ def create_commit_status(context, state, description, url = null) {
     }
 }
 
-def upload_job_console(job) {
+def upload_job_console(job, commit_directory, pull_directory) {
     def job_name = job.projectName
     def build_number = Integer.toString(job.number)
 
@@ -296,52 +343,49 @@ def upload_job_console(job) {
         retry(count: 3) {
             return common.openzfscish(OPENZFSCI_DIRECTORY, 'upload-job-console-to-manta', true, [
                 ['JENKINS_URL', env.JENKINS_URL],
-                ['REPOSITORY', OPENZFS_REPOSITORY],
-                ['COMMIT', OPENZFS_COMMIT],
-                ['PULL_NUMBER', OPENZFS_PULL_NUMBER],
                 ['JOB_NAME', job_name],
                 ['BUILD_NUMBER', build_number],
-            ])
+                ['COMMIT_DIRECTORY', commit_directory],
+                ['PULL_DIRECTORY', pull_directory ? pull_directory : ''],
+            ]).trim()
         }
     }
 }
 
-def upload_remote_job_test_results(job, directory) {
+def upload_remote_job_test_results(job, commit_directory, pull_directory, remote_directory) {
     node('master') {
         unstash(name: 'openzfs-ci')
         def common = load("${OPENZFSCI_DIRECTORY}/jenkins/jobs/pipelines/library/common.groovy")
 
         retry(count: 3) {
             return common.openzfscish(OPENZFSCI_DIRECTORY, 'upload-remote-directory-to-manta', true, [
-                ['REPOSITORY', OPENZFS_REPOSITORY],
-                ['COMMIT', OPENZFS_COMMIT],
-                ['PULL_NUMBER', OPENZFS_PULL_NUMBER],
                 ['JOB_NAME', job.projectName],
                 ['DCENTER_HOST', env.DCENTER_HOST],
                 ['DCENTER_GUEST', job.rawBuild.environment.get('NODE_NAME')],
                 ['DCENTER_IMAGE', env.DCENTER_IMAGE],
-                ['REMOTE_DIRECTORY', directory],
-            ])
+                ['REMOTE_DIRECTORY', remote_directory],
+                ['COMMIT_DIRECTORY', commit_directory],
+                ['PULL_DIRECTORY', pull_directory ? pull_directory : ''],
+            ]).trim()
         }
     }
 }
 
-def upload_remote_job_test_logfile(job, logfile) {
+def upload_remote_job_test_logfile(job, commit_directory, pull_directory, logfile) {
     node('master') {
         unstash(name: 'openzfs-ci')
         def common = load("${OPENZFSCI_DIRECTORY}/jenkins/jobs/pipelines/library/common.groovy")
 
         retry(count: 3) {
             return common.openzfscish(OPENZFSCI_DIRECTORY, 'upload-remote-logfile-to-manta', true, [
-                ['REPOSITORY', OPENZFS_REPOSITORY],
-                ['COMMIT', OPENZFS_COMMIT],
-                ['PULL_NUMBER', OPENZFS_PULL_NUMBER],
                 ['JOB_NAME', job.projectName],
                 ['DCENTER_HOST', env.DCENTER_HOST],
                 ['DCENTER_GUEST', job.rawBuild.environment.get('NODE_NAME')],
                 ['DCENTER_IMAGE', env.DCENTER_IMAGE],
                 ['REMOTE_LOGFILE', logfile],
-            ])
+                ['COMMIT_DIRECTORY', commit_directory],
+                ['PULL_DIRECTORY', pull_directory ? pull_directory : ''],
+            ]).trim()
         }
     }
 }

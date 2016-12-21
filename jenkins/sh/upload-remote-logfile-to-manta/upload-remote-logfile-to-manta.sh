@@ -2,19 +2,14 @@
 
 source "${SH_LIBRARY_PATH}/common.sh"
 source "${SH_LIBRARY_PATH}/vault.sh"
+source "${SH_LIBRARY_PATH}/manta.sh"
 
 check_env OPENZFSCI_DIRECTORY DCENTER_GUEST DCENTER_HOST DCENTER_IMAGE \
-    REMOTE_LOGFILE JOB_NAME REPOSITORY COMMIT
+    REMOTE_LOGFILE JOB_NAME COMMIT_DIRECTORY
 
 export HOST="${DCENTER_GUEST}.${DCENTER_HOST}"
 export USER=$(vault_read_ssh_user_dcenter_image $DCENTER_IMAGE)
 export PASS=$(vault_read_ssh_password_dcenter_image $DCENTER_IMAGE)
-
-export MANTA_URL=$(vault_read_manta_https)
-export MANTA_HTTP=$(vault_read_manta_http)
-export MANTA_USER=$(vault_read_manta_user)
-export MANTA_KEY_ID=$(vault_read_manta_keyid)
-
 export HOME=$PWD
 
 function log_must_ssh
@@ -25,14 +20,7 @@ function log_must_ssh
         "$USER@$HOST" "$@"
 }
 
-log_must mkdir -p $HOME/.ssh
-log_must chmod 700 $HOME/.ssh
-
-log_must vault_read_manta_private_key > $HOME/.ssh/id_rsa
-log_must chmod 400 $HOME/.ssh/id_rsa
-
-log_must vault_read_manta_public_key > $HOME/.ssh/id_rsa.pub
-log_must chmod 644 $HOME/.ssh/id_rsa
+manta_setup_environment
 
 log_must test -d "$OPENZFSCI_DIRECTORY"
 log_must cd "$OPENZFSCI_DIRECTORY/ansible"
@@ -69,24 +57,18 @@ log_must_ssh "test \$(ls -1d $REMOTE_LOGFILE | wc -l) == 1"
 #
 log_must_ssh "test -f $REMOTE_LOGFILE"
 
-COMMITS_DIRECTORY="$MANTA_USER/public/$REPOSITORY/commit/$COMMIT"
 FILE="${JOB_NAME}.log"
-
-log_must mmkdir -p "/$COMMITS_DIRECTORY"
 
 { log_must_ssh "cat $REMOTE_LOGFILE" | \
     pv -fi 15 2>&3 | \
-    log_must mput "/$COMMITS_DIRECTORY/$FILE"; } 3>&1 | \
+    log_must mput "/$COMMIT_DIRECTORY/$FILE"; } 3>&1 | \
     stdbuf -oL -eL tr '\r' '\n' >&2
 
-if [[ -n "$PULL_NUMBER" ]]; then
-    PULLS_DIRECTORY="$MANTA_USER/public/$REPOSITORY/pull/$PULL_NUMBER"
-    log_must mmkdir -p "/$PULLS_DIRECTORY"
-    log_must mln "/$COMMITS_DIRECTORY/$FILE" "/$PULLS_DIRECTORY/$FILE"
-
-    echo "$MANTA_HTTP/$PULLS_DIRECTORY/$FILE"
+if [[ -n "$PULL_DIRECTORY" ]]; then
+    log_must mln "/$COMMIT_DIRECTORY/$FILE" "/$PULL_DIRECTORY/$FILE"
+    echo "$MANTA_HTTP/$PULL_DIRECTORY/$FILE"
 else
-    echo "$MANTA_HTTP/$COMMITS_DIRECTORY/$FILE"
+    echo "$MANTA_HTTP/$COMMIT_DIRECTORY/$FILE"
 fi
 
 # vim: tabstop=4 softtabstop=4 shiftwidth=4 expandtab textwidth=72 colorcolumn=80
