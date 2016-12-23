@@ -20,6 +20,18 @@ function vault_setup_environment
     export VAULT_TOKEN="14183ec4-a7f3-10b6-232a-d9f9d63928dc"
 }
 
+function vault_read_smtp_user
+{
+    [[ -z "$VAULT_TOKEN" ]] && vault_setup_environment
+    vault read -field=value secret/openzfsci/smtp/user
+}
+
+function vault_read_smtp_password
+{
+    [[ -z "$VAULT_TOKEN" ]] && vault_setup_environment
+    vault read -field=value secret/openzfsci/smtp/password
+}
+
 function vault_read_github_user
 {
     [[ -z "$VAULT_TOKEN" ]] && vault_setup_environment

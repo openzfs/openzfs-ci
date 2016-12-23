@@ -13,7 +13,8 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN pip install ansible cryptography
-RUN gem install octokit -v 4.3.0 && gem install netrc -v 0.11.0
+RUN gem install octokit -v 4.3.0 && gem install netrc -v 0.11.0 && \
+    gem install mail -v 2.6.4
 RUN npm install manta -g && npm cache clear
 RUN wget -qO /usr/bin/runurl run.alestic.com/runurl && chmod 755 /usr/bin/runurl
 RUN wget -qO /tmp/vault.zip \
