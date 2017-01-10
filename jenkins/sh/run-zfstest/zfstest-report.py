@@ -55,6 +55,7 @@ known = {
     'redundancy/redundancy_001_pos': 'FAIL',
     'redundancy/redundancy_002_pos': 'FAIL',
     'redundancy/redundancy_003_pos': 'FAIL',
+    'redundancy/redundancy_004_neg': 'FAIL',
     'reservation/reservation_013_pos': 'FAIL',
     'reservation/reservation_017_pos': 'FAIL',
     'rsend/rsend_008_pos': 'FAIL',
