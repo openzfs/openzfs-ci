@@ -19,7 +19,7 @@ function manta_setup_environment
     log_must chmod 400 $HOME/.ssh/id_rsa
 
     log_must vault_read_manta_public_key > $HOME/.ssh/id_rsa.pub
-    log_must chmod 644 $HOME/.ssh/id_rsa
+    log_must chmod 644 $HOME/.ssh/id_rsa.pub
 }
 
 function manta_get_current_number_for_directory

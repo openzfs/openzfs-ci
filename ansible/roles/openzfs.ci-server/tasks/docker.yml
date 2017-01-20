@@ -82,7 +82,7 @@
 # pull down this image if it doesn't already exist on the system.
 #
 - name: create and run jenkins-master container
-  docker:
+  docker_container:
     name: jenkins-master
     image: openzfs/jenkins-master
     state: started
@@ -103,7 +103,7 @@
       OPENZFSCI_BRANCH: master
 
 - name: create and run jenkins-master-devel container
-  docker:
+  docker_container:
     name: jenkins-master-devel
     image: openzfs/jenkins-master-devel
     state: started
