@@ -17,6 +17,9 @@ RUN gem install octokit -v 4.3.0 && gem install netrc -v 0.11.0 && \
     gem install mail -v 2.6.4
 RUN npm install manta -g && npm cache clear
 RUN wget -qO /usr/bin/runurl run.alestic.com/runurl && chmod 755 /usr/bin/runurl
+RUN wget -qO /tmp/hub.tgz \
+    https://github.com/github/hub/releases/download/v2.2.9/hub-linux-amd64-2.2.9.tgz && \
+    tar -xf /tmp/hub.tgz && ./hub-linux-amd64-2.2.9/install && rm /tmp/hub.tgz
 RUN wget -qO /tmp/vault.zip \
     https://releases.hashicorp.com/vault/0.6.1/vault_0.6.1_linux_amd64.zip && \
     unzip -d /bin /tmp/vault.zip && rm /tmp/vault.zip && chmod 755 /bin/vault
