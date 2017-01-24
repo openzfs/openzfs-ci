@@ -6,7 +6,7 @@ require 'octokit'
 require 'optparse'
 require 'ostruct'
 
-APPROVAL_ORGS = ['openzfs', 'delphix']
+APPROVAL_ORGS = ['delphix']
 APPROVAL_STRING = '@zettabot go'
 
 def get_options()
