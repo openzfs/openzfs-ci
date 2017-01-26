@@ -1,4 +1,4 @@
-FROM jenkinsci/jenkins:2.24
+FROM jenkinsci/jenkins:2.42
 
 USER root
 
