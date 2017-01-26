@@ -9,4 +9,4 @@ fi
 
 virtualenv $TOP/ansible/venv
 source $TOP/ansible/venv/bin/activate
-pip install ansible==2.1
+pip install ansible==2.2

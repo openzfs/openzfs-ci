@@ -86,6 +86,7 @@
     name: jenkins-master
     image: openzfs/jenkins-master
     state: started
+    ignore_image: yes
     restart_policy: always
     ports:
       - 8080:8080
@@ -107,6 +108,7 @@
     name: jenkins-master-devel
     image: openzfs/jenkins-master-devel
     state: started
+    ignore_image: yes
     restart_policy: always
     ports:
       - 8081:8080
