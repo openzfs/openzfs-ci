@@ -36,7 +36,8 @@ try {
         stage('create-builder') {
             create_commit_status('01-create-builder', 'pending', 'Creation of the build machine in progress.')
 
-            def job = build(job: '01-create-builder', propagate: false, quietPeriod: 0, wait: true, parameters: [
+            def job = build(job: 'regression-steps/01-create-builder',
+                            propagate: false, quietPeriod: 0, wait: true, parameters: [
                 [$class: 'StringParameterValue', name: 'OPENZFSCI_REPOSITORY', value: OPENZFSCI_REPOSITORY],
                 [$class: 'StringParameterValue', name: 'OPENZFSCI_BRANCH', value: OPENZFSCI_BRANCH],
                 [$class: 'StringParameterValue', name: 'OPENZFSCI_DIRECTORY', value: OPENZFSCI_DIRECTORY],
@@ -53,7 +54,8 @@ try {
         stage('checkout') {
             create_commit_status('02-checkout', 'pending', "Checkout of commit ${OPENZFS_COMMIT_SHORT} in progress.")
 
-            def job = build(job: '02-checkout', propagate: false, quietPeriod: 0, wait: true, parameters: [
+            def job = build(job: 'regression-steps/02-checkout',
+                            propagate: false, quietPeriod: 0, wait: true, parameters: [
                 [$class: 'StringParameterValue', name: 'OPENZFSCI_REPOSITORY', value: OPENZFSCI_REPOSITORY],
                 [$class: 'StringParameterValue', name: 'OPENZFSCI_BRANCH', value: OPENZFSCI_BRANCH],
                 [$class: 'StringParameterValue', name: 'OPENZFSCI_DIRECTORY', value: OPENZFSCI_DIRECTORY],
@@ -77,7 +79,8 @@ try {
         stage('build') {
             create_commit_status('03-build', 'pending', "Build of commit ${OPENZFS_COMMIT_SHORT} in progress.")
 
-            def job = build(job: '03-build', propagate: false, quietPeriod: 0, wait: true, parameters: [
+            def job = build(job: 'regression-steps/03-build',
+                            propagate: false, quietPeriod: 0, wait: true, parameters: [
                 [$class: 'StringParameterValue', name: 'OPENZFSCI_DIRECTORY', value: OPENZFSCI_DIRECTORY],
                 [$class: 'StringParameterValue', name: 'OPENZFS_DIRECTORY', value: OPENZFS_DIRECTORY],
                 [$class: 'StringParameterValue', name: 'WORKSPACE', value: env.BUILDER_WORKSPACE],
@@ -93,7 +96,8 @@ try {
         stage('nits') {
             create_commit_status('04-nits', 'pending', "Checking nits of commit ${OPENZFS_COMMIT_SHORT} in progress.")
 
-            def job = build(job: '04-nits', propagate: false, quietPeriod: 0, wait: true, parameters: [
+            def job = build(job: 'regression-steps/04-nits',
+                            propagate: false, quietPeriod: 0, wait: true, parameters: [
                 [$class: 'StringParameterValue', name: 'OPENZFSCI_DIRECTORY', value: OPENZFSCI_DIRECTORY],
                 [$class: 'StringParameterValue', name: 'OPENZFS_DIRECTORY', value: OPENZFS_DIRECTORY],
                 [$class: 'StringParameterValue', name: 'OPENZFS_BASE_COMMIT', value: OPENZFS_COMMIT_BASE],
@@ -110,7 +114,8 @@ try {
         stage('install') {
             create_commit_status('05-install', 'pending', "Installation of commit ${OPENZFS_COMMIT_SHORT} in progress.")
 
-            def job = build(job: '05-install', propagate: false, quietPeriod: 0, wait: true, parameters: [
+            def job = build(job: 'regression-steps/05-install',
+                            propagate: false, quietPeriod: 0, wait: true, parameters: [
                 [$class: 'StringParameterValue', name: 'OPENZFSCI_DIRECTORY', value: OPENZFSCI_DIRECTORY],
                 [$class: 'StringParameterValue', name: 'OPENZFS_DIRECTORY', value: OPENZFS_DIRECTORY],
                 [$class: 'StringParameterValue', name: 'WORKSPACE', value: env.BUILDER_WORKSPACE],
@@ -126,7 +131,8 @@ try {
         stage('unregister-builder') {
             create_commit_status('06-unregister-builder', 'pending', 'Unregistration of the build machine in progress.')
 
-            def job = build(job: '06-unregister-builder', propagate: false, quietPeriod: 0, wait: true, parameters: [
+            def job = build(job: 'regression-steps/06-unregister-builder',
+                            propagate: false, quietPeriod: 0, wait: true, parameters: [
                 [$class: 'StringParameterValue', name: 'OPENZFSCI_REPOSITORY', value: OPENZFSCI_REPOSITORY],
                 [$class: 'StringParameterValue', name: 'OPENZFSCI_BRANCH', value: OPENZFSCI_BRANCH],
                 [$class: 'StringParameterValue', name: 'OPENZFSCI_DIRECTORY', value: OPENZFSCI_DIRECTORY],
@@ -144,7 +150,8 @@ try {
     stage('snapshot-builder') {
         create_commit_status('07-snapshot-builder', 'pending', 'Snapshotting the build machine in progress.')
 
-        def job = build(job: '07-snapshot-builder', propagate: false, quietPeriod: 0, wait: true, parameters: [
+        def job = build(job: 'regression-steps/07-snapshot-builder',
+                        propagate: false, quietPeriod: 0, wait: true, parameters: [
             [$class: 'StringParameterValue', name: 'OPENZFSCI_REPOSITORY', value: OPENZFSCI_REPOSITORY],
             [$class: 'StringParameterValue', name: 'OPENZFSCI_BRANCH', value: OPENZFSCI_BRANCH],
             [$class: 'StringParameterValue', name: 'OPENZFSCI_DIRECTORY', value: OPENZFSCI_DIRECTORY],
@@ -162,7 +169,8 @@ try {
         stage('create-testers') {
             create_commit_status('08-create-testers', 'pending', 'Creation of the test machines in progress.')
 
-            def job = build(job: '08-create-testers', propagate: false, quietPeriod: 0, wait: true, parameters: [
+            def job = build(job: 'regression-steps/08-create-testers',
+                            propagate: false, quietPeriod: 0, wait: true, parameters: [
                 [$class: 'StringParameterValue', name: 'OPENZFSCI_REPOSITORY', value: OPENZFSCI_REPOSITORY],
                 [$class: 'StringParameterValue', name: 'OPENZFSCI_BRANCH', value: OPENZFSCI_BRANCH],
                 [$class: 'StringParameterValue', name: 'OPENZFSCI_DIRECTORY', value: OPENZFSCI_DIRECTORY],
@@ -184,7 +192,8 @@ try {
                 create_commit_status('09-zloop', 'pending',
                     "Run of 'zloop' for commit ${OPENZFS_COMMIT_SHORT} in progress.")
 
-                def job = build(job: '09-zloop', propagate: false, quietPeriod: 0, wait: true, parameters: [
+                def job = build(job: 'regression-steps/09-zloop',
+                                propagate: false, quietPeriod: 0, wait: true, parameters: [
                     [$class: 'StringParameterValue', name: 'OPENZFSCI_REPOSITORY', value: OPENZFSCI_REPOSITORY],
                     [$class: 'StringParameterValue', name: 'OPENZFSCI_BRANCH', value: OPENZFSCI_BRANCH],
                     [$class: 'StringParameterValue', name: 'OPENZFSCI_DIRECTORY', value: OPENZFSCI_DIRECTORY],
@@ -203,7 +212,8 @@ try {
                 create_commit_status('10-zfstest', 'pending',
                     "Run of 'zfstest' for commit ${OPENZFS_COMMIT_SHORT} in progress.")
 
-                def job = build(job: '10-zfstest', propagate: false, quietPeriod: 0, wait: true, parameters: [
+                def job = build(job: 'regression-steps/10-zfstest',
+                                propagate: false, quietPeriod: 0, wait: true, parameters: [
                     [$class: 'StringParameterValue', name: 'OPENZFSCI_REPOSITORY', value: OPENZFSCI_REPOSITORY],
                     [$class: 'StringParameterValue', name: 'OPENZFSCI_BRANCH', value: OPENZFSCI_BRANCH],
                     [$class: 'StringParameterValue', name: 'OPENZFSCI_DIRECTORY', value: OPENZFSCI_DIRECTORY],
@@ -224,7 +234,8 @@ try {
         stage('unregister-testers') {
             create_commit_status('11-unregister-testers', 'pending', 'Unregistration of the test machines in progress.')
 
-            def job = build(job: '11-unregister-testers', propagate: false, quietPeriod: 0, wait: true, parameters: [
+            def job = build(job: 'regression-steps/11-unregister-testers',
+                            propagate: false, quietPeriod: 0, wait: true, parameters: [
                 [$class: 'StringParameterValue', name: 'OPENZFSCI_REPOSITORY', value: OPENZFSCI_REPOSITORY],
                 [$class: 'StringParameterValue', name: 'OPENZFSCI_BRANCH', value: OPENZFSCI_BRANCH],
                 [$class: 'StringParameterValue', name: 'OPENZFSCI_DIRECTORY', value: OPENZFSCI_DIRECTORY],
@@ -257,7 +268,7 @@ def post_job_status(job, commit_directory, pull_directory, context, description)
 }
 
 def error_if_job_result_not_success(job) {
-    def job_name = job.projectName
+    def job_name = job.rawBuild.environment.get('JOB_BASE_NAME')
     def build_number = Integer.toString(job.number)
 
     if (job.result != 'SUCCESS')
@@ -333,7 +344,7 @@ def create_commit_status(context, state, description, url = null) {
 }
 
 def upload_job_console(job, commit_directory, pull_directory) {
-    def job_name = job.projectName
+    def job_name = job.rawBuild.environment.get('JOB_BASE_NAME')
     def build_number = Integer.toString(job.number)
 
     node('master') {
@@ -359,7 +370,7 @@ def upload_remote_job_test_results(job, commit_directory, pull_directory, remote
 
         retry(count: 3) {
             return common.openzfscish(OPENZFSCI_DIRECTORY, 'upload-remote-directory-to-manta', true, [
-                ['JOB_NAME', job.projectName],
+                ['JOB_NAME', job.rawBuild.environment.get('JOB_BASE_NAME')],
                 ['DCENTER_HOST', env.DCENTER_HOST],
                 ['DCENTER_GUEST', job.rawBuild.environment.get('NODE_NAME')],
                 ['DCENTER_IMAGE', env.DCENTER_IMAGE],
@@ -378,7 +389,7 @@ def upload_remote_job_test_logfile(job, commit_directory, pull_directory, logfil
 
         retry(count: 3) {
             return common.openzfscish(OPENZFSCI_DIRECTORY, 'upload-remote-logfile-to-manta', true, [
-                ['JOB_NAME', job.projectName],
+                ['JOB_NAME', job.rawBuild.environment.get('JOB_BASE_NAME')],
                 ['DCENTER_HOST', env.DCENTER_HOST],
                 ['DCENTER_GUEST', job.rawBuild.environment.get('NODE_NAME')],
                 ['DCENTER_IMAGE', env.DCENTER_IMAGE],

@@ -1,4 +1,4 @@
-job('10-zfstest') {
+job('regression-steps/10-zfstest') {
     concurrentBuild(true)
 
     wrappers {

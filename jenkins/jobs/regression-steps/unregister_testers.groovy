@@ -1,4 +1,4 @@
-job('11-unregister-testers') {
+job('regression-steps/11-unregister-testers') {
     label('master')
     concurrentBuild(true)
 

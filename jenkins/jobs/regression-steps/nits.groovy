@@ -1,4 +1,4 @@
-job('03-build') {
+job('regression-steps/04-nits') {
     concurrentBuild(true)
 
     wrappers {
@@ -7,7 +7,9 @@ job('03-build') {
 
     parameters {
         stringParam('OPENZFSCI_DIRECTORY')
+
         stringParam('OPENZFS_DIRECTORY')
+        stringParam('OPENZFS_BASE_COMMIT')
 
         stringParam('WORKSPACE')
         nodeParam('BUILDER')
@@ -18,13 +20,11 @@ job('03-build') {
     environmentVariables {
         env('SH_LIBRARY_PATH', '${OPENZFSCI_DIRECTORY}/jenkins/sh/library')
         env('OPENZFS_DIRECTORY', '${OPENZFS_DIRECTORY}')
-        env('BUILD_NONDEBUG', 'yes')
-        env('BUILD_DEBUG', 'yes')
-        env('RUN_LINT', 'yes')
+        env('BASE_COMMIT', '${OPENZFS_BASE_COMMIT}')
     }
 
     steps {
-        shell('${OPENZFSCI_DIRECTORY}/jenkins/sh/nightly-build/nightly-build.sh')
+        shell('${OPENZFSCI_DIRECTORY}/jenkins/sh/nightly-nits/nightly-nits.sh')
     }
 }
 

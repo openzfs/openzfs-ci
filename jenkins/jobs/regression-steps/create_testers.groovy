@@ -1,4 +1,4 @@
-job('08-create-testers') {
+job('regression-steps/08-create-testers') {
     label('master')
     concurrentBuild(true)
 

@@ -1,4 +1,4 @@
-job('04-nits') {
+job('regression-steps/05-install') {
     concurrentBuild(true)
 
     wrappers {
@@ -7,9 +7,7 @@ job('04-nits') {
 
     parameters {
         stringParam('OPENZFSCI_DIRECTORY')
-
         stringParam('OPENZFS_DIRECTORY')
-        stringParam('OPENZFS_BASE_COMMIT')
 
         stringParam('WORKSPACE')
         nodeParam('BUILDER')
@@ -20,11 +18,11 @@ job('04-nits') {
     environmentVariables {
         env('SH_LIBRARY_PATH', '${OPENZFSCI_DIRECTORY}/jenkins/sh/library')
         env('OPENZFS_DIRECTORY', '${OPENZFS_DIRECTORY}')
-        env('BASE_COMMIT', '${OPENZFS_BASE_COMMIT}')
+        env('INSTALL_DEBUG', 'yes')
     }
 
     steps {
-        shell('${OPENZFSCI_DIRECTORY}/jenkins/sh/nightly-nits/nightly-nits.sh')
+        shell('${OPENZFSCI_DIRECTORY}/jenkins/sh/nightly-install/nightly-install.sh')
     }
 }
 

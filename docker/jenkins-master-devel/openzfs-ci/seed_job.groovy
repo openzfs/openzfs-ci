@@ -9,7 +9,12 @@ job('seed-job') {
 
     steps {
         dsl {
+            external('jenkins/jobs/folders.groovy')
+
             external('jenkins/jobs/*.groovy')
+            external('jenkins/jobs/*/*.groovy')
+
+            removeAction('DELETE')
         }
     }
 }

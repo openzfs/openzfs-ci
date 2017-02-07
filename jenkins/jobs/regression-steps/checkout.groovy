@@ -1,16 +1,16 @@
-job('09-zloop') {
+job('regression-steps/02-checkout') {
     concurrentBuild(true)
-
-    wrappers {
-        colorizeOutput('xterm')
-    }
 
     parameters {
         stringParam('OPENZFSCI_REPOSITORY')
         stringParam('OPENZFSCI_BRANCH')
         stringParam('OPENZFSCI_DIRECTORY')
 
-        nodeParam('ZLOOP_TESTER')
+        stringParam('OPENZFS_REPOSITORY')
+        stringParam('OPENZFS_COMMIT')
+        stringParam('OPENZFS_DIRECTORY')
+
+        nodeParam('BUILDER')
     }
 
     multiscm {
@@ -26,16 +26,21 @@ job('09-zloop') {
                 relativeTargetDirectory('${OPENZFSCI_DIRECTORY}')
             }
         }
-    }
 
-    environmentVariables {
-        env('SH_LIBRARY_PATH', '${OPENZFSCI_DIRECTORY}/jenkins/sh/library')
-        env('RUN_TIME', '9000')
-        env('ENABLE_WATCHPOINTS', 'no')
-    }
+        git {
+            remote {
+                name('origin')
+                github('${OPENZFS_REPOSITORY}')
+                refspec('+refs/pull/*:refs/remotes/origin/pr/*')
+            }
 
-    steps {
-        shell('${OPENZFSCI_DIRECTORY}/jenkins/sh/run-zloop/run-zloop.sh')
+            branch('${OPENZFS_COMMIT}')
+
+            extensions {
+                relativeTargetDirectory('${OPENZFS_DIRECTORY}')
+                cleanBeforeCheckout()
+            }
+        }
     }
 }
 

@@ -1,4 +1,4 @@
-job('05-install') {
+job('regression-steps/03-build') {
     concurrentBuild(true)
 
     wrappers {
@@ -18,11 +18,13 @@ job('05-install') {
     environmentVariables {
         env('SH_LIBRARY_PATH', '${OPENZFSCI_DIRECTORY}/jenkins/sh/library')
         env('OPENZFS_DIRECTORY', '${OPENZFS_DIRECTORY}')
-        env('INSTALL_DEBUG', 'yes')
+        env('BUILD_NONDEBUG', 'yes')
+        env('BUILD_DEBUG', 'yes')
+        env('RUN_LINT', 'yes')
     }
 
     steps {
-        shell('${OPENZFSCI_DIRECTORY}/jenkins/sh/nightly-install/nightly-install.sh')
+        shell('${OPENZFSCI_DIRECTORY}/jenkins/sh/nightly-build/nightly-build.sh')
     }
 }
 

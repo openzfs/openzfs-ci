@@ -1,4 +1,4 @@
-job('01-create-builder') {
+job('regression-steps/07-snapshot-builder') {
     label('master')
     concurrentBuild(true)
 
@@ -12,9 +12,10 @@ job('01-create-builder') {
         stringParam('OPENZFSCI_DIRECTORY')
 
         stringParam('DCENTER_HOST')
-        stringParam('DCENTER_IMAGE')
+        stringParam('DCENTER_EXPIRATION')
 
         stringParam('BUILDER')
+        stringParam('BUILDER_SNAPSHOT')
     }
 
     multiscm {
@@ -36,17 +37,12 @@ job('01-create-builder') {
         env('SH_LIBRARY_PATH', '${OPENZFSCI_DIRECTORY}/jenkins/sh/library')
 
         env('DCENTER_HOST', '${DCENTER_HOST}')
-        env('DCENTER_IMAGE', '${DCENTER_IMAGE}')
         env('DCENTER_GUEST', '${BUILDER}')
-
-        env('EXTRA_VARS', 'jenkins_name=${BUILDER} jenkins_master=${JENKINS_URL}')
-        env('ROLES', 'openzfs.build-slave openzfs.jenkins-slave')
-        env('WAIT_FOR_SSH', 'yes')
+        env('DCENTER_SNAPSHOT', '${BUILDER_SNAPSHOT}')
     }
 
     steps {
-        shell('${OPENZFSCI_DIRECTORY}/jenkins/sh/dcenter-clone-latest/dcenter-clone-latest.sh')
-        shell('${OPENZFSCI_DIRECTORY}/jenkins/sh/ansible-deploy-roles/ansible-deploy-roles.sh')
+        shell('${OPENZFSCI_DIRECTORY}/jenkins/sh/dcenter-snapshot/dcenter-snapshot.sh')
     }
 }
 
