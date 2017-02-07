@@ -5,7 +5,7 @@ source "${SH_LIBRARY_PATH}/vault.sh"
 source "${SH_LIBRARY_PATH}/manta.sh"
 
 check_env OPENZFSCI_DIRECTORY DCENTER_GUEST DCENTER_HOST DCENTER_IMAGE \
-    REMOTE_DIRECTORY JOB_NAME COMMIT_DIRECTORY
+    REMOTE_DIRECTORY JOB_BASE_NAME COMMIT_DIRECTORY
 
 export HOST="${DCENTER_GUEST}.${DCENTER_HOST}"
 export USER=$(vault_read_ssh_user_dcenter_image $DCENTER_IMAGE)
@@ -49,7 +49,7 @@ log_must ansible-playbook -vvvv -i inventory.txt playbook.yml >&2
 #
 log_must_ssh test -d "$REMOTE_DIRECTORY"
 
-FILE="${JOB_NAME}.tar.xz"
+FILE="${JOB_BASE_NAME}.tar.xz"
 
 { log_must_ssh "gtar -C '$REMOTE_DIRECTORY' -cf - . | xz -9e --stdout -" | \
     pv -fi 15 2>&3 | \

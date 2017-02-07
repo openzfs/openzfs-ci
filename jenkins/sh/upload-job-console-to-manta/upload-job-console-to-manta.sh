@@ -4,11 +4,11 @@ source "${SH_LIBRARY_PATH}/common.sh"
 source "${SH_LIBRARY_PATH}/vault.sh"
 source "${SH_LIBRARY_PATH}/manta.sh"
 
-check_env JENKINS_URL JOB_NAME BUILD_NUMBER COMMIT_DIRECTORY
+check_env BUILD_URL JOB_BASE_NAME COMMIT_DIRECTORY
 
 function get_build_result
 {
-    log curl -s $JENKINS_URL/job/$JOB_NAME/$BUILD_NUMBER/api/json | \
+    log curl -s $BUILD_URL/api/json | \
     log jq -M .result
 }
 
@@ -19,7 +19,7 @@ function get_build_console
     # "pup" to strip out everything else from the returned HTML, and only
     # the contents we're interested in will be included in the file.
     #
-    log_must curl -s $JENKINS_URL/job/$JOB_NAME/$BUILD_NUMBER/consoleFull | \
+    log_must curl -s $BUILD_URL/consoleFull | \
     log_must pup --pre 'pre[class="console-output"]'
 }
 
@@ -32,7 +32,7 @@ while [[ -z "$JOB_RESULT" || "$JOB_RESULT" = "null" ]]; do
     JOB_RESULT=$(get_build_result)
 done
 
-FILE="${JOB_NAME}.html"
+FILE="${JOB_BASE_NAME}.html"
 get_build_console > "$FILE"
 
 #

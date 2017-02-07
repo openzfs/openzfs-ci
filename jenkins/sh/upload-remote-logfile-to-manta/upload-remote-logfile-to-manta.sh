@@ -5,7 +5,7 @@ source "${SH_LIBRARY_PATH}/vault.sh"
 source "${SH_LIBRARY_PATH}/manta.sh"
 
 check_env OPENZFSCI_DIRECTORY DCENTER_GUEST DCENTER_HOST DCENTER_IMAGE \
-    REMOTE_LOGFILE JOB_NAME COMMIT_DIRECTORY
+    REMOTE_LOGFILE JOB_BASE_NAME COMMIT_DIRECTORY
 
 export HOST="${DCENTER_GUEST}.${DCENTER_HOST}"
 export USER=$(vault_read_ssh_user_dcenter_image $DCENTER_IMAGE)
@@ -57,7 +57,7 @@ log_must_ssh "test \$(ls -1d $REMOTE_LOGFILE | wc -l) == 1"
 #
 log_must_ssh "test -f $REMOTE_LOGFILE"
 
-FILE="${JOB_NAME}.log"
+FILE="${JOB_BASE_NAME}.log"
 
 { log_must_ssh "cat $REMOTE_LOGFILE" | \
     pv -fi 15 2>&3 | \

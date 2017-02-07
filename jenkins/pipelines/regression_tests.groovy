@@ -353,9 +353,8 @@ def upload_job_console(job, commit_directory, pull_directory) {
 
         retry(count: 3) {
             return common.openzfscish(OPENZFSCI_DIRECTORY, 'upload-job-console-to-manta', true, [
-                ['JENKINS_URL', env.JENKINS_URL],
-                ['JOB_NAME', job_name],
-                ['BUILD_NUMBER', build_number],
+                ['BUILD_URL', job.rawBuild.environment.get('BUILD_URL')],
+                ['JOB_BASE_NAME', job.rawBuild.environment.get('JOB_BASE_NAME')],
                 ['COMMIT_DIRECTORY', commit_directory],
                 ['PULL_DIRECTORY', pull_directory ? pull_directory : ''],
             ]).trim()
@@ -370,7 +369,7 @@ def upload_remote_job_test_results(job, commit_directory, pull_directory, remote
 
         retry(count: 3) {
             return common.openzfscish(OPENZFSCI_DIRECTORY, 'upload-remote-directory-to-manta', true, [
-                ['JOB_NAME', job.rawBuild.environment.get('JOB_BASE_NAME')],
+                ['JOB_BASE_NAME', job.rawBuild.environment.get('JOB_BASE_NAME')],
                 ['DCENTER_HOST', env.DCENTER_HOST],
                 ['DCENTER_GUEST', job.rawBuild.environment.get('NODE_NAME')],
                 ['DCENTER_IMAGE', env.DCENTER_IMAGE],
@@ -389,7 +388,7 @@ def upload_remote_job_test_logfile(job, commit_directory, pull_directory, logfil
 
         retry(count: 3) {
             return common.openzfscish(OPENZFSCI_DIRECTORY, 'upload-remote-logfile-to-manta', true, [
-                ['JOB_NAME', job.rawBuild.environment.get('JOB_BASE_NAME')],
+                ['JOB_BASE_NAME', job.rawBuild.environment.get('JOB_BASE_NAME')],
                 ['DCENTER_HOST', env.DCENTER_HOST],
                 ['DCENTER_GUEST', job.rawBuild.environment.get('NODE_NAME')],
                 ['DCENTER_IMAGE', env.DCENTER_IMAGE],
