@@ -28,7 +28,7 @@ pipelineJob('get-illumos-commits') {
 
     definition {
         cps {
-            script(readFileFromWorkspace('jenkins/jobs/pipelines/get_commits.groovy'))
+            script(readFileFromWorkspace('jenkins/pipelines/get_commits.groovy'))
         }
     }
 }

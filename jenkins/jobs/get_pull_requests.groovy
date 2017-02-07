@@ -34,7 +34,7 @@ pipelineJob('get-pull-requests') {
 
     definition {
         cps {
-            script(readFileFromWorkspace('jenkins/jobs/pipelines/get_pull_requests.groovy'))
+            script(readFileFromWorkspace('jenkins/pipelines/get_pull_requests.groovy'))
         }
     }
 }

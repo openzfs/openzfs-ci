@@ -16,7 +16,7 @@ node('master') {
                   userRemoteConfigs: [[name: 'origin', url: "https://github.com/${OPENZFSCI_REPOSITORY}"]],
                   branches: [[name: OPENZFSCI_BRANCH]],
                   extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: OPENZFSCI_DIRECTORY]]])
-        common = load("${OPENZFSCI_DIRECTORY}/jenkins/jobs/pipelines/library/common.groovy")
+        common = load("${OPENZFSCI_DIRECTORY}/jenkins/pipelines/library/common.groovy")
 
         checkout([$class: 'GitSCM', changelog: true, poll: true,
                   userRemoteConfigs: [[name: "${env.OPENZFS_REMOTE}",

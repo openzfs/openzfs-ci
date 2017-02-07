@@ -27,7 +27,7 @@ pipelineJob('00-regression-tests') {
 
     definition {
         cps {
-            script(readFileFromWorkspace('jenkins/jobs/pipelines/step_regression_tests.groovy'))
+            script(readFileFromWorkspace('jenkins/pipelines/step_regression_tests.groovy'))
         }
     }
 }

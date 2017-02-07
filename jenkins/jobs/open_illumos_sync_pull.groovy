@@ -38,7 +38,7 @@ pipelineJob('open-illumos-sync-pull') {
 
     definition {
         cps {
-            script(readFileFromWorkspace('jenkins/jobs/pipelines/open_illumos_sync_pull.groovy'))
+            script(readFileFromWorkspace('jenkins/pipelines/open_illumos_sync_pull.groovy'))
         }
     }
 }

@@ -32,7 +32,7 @@ pipelineJob('get-openzfs-commits') {
 
     definition {
         cps {
-            script(readFileFromWorkspace('jenkins/jobs/pipelines/get_commits.groovy'))
+            script(readFileFromWorkspace('jenkins/pipelines/get_commits.groovy'))
         }
     }
 }

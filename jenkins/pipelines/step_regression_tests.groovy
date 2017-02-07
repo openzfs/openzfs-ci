@@ -287,7 +287,7 @@ def post_remote_job_test_logfile(job, commit_directory, pull_directory, context,
 def create_commit_directory_on_manta() {
     node('master') {
         unstash(name: 'openzfs-ci')
-        def common = load("${OPENZFSCI_DIRECTORY}/jenkins/jobs/pipelines/library/common.groovy")
+        def common = load("${OPENZFSCI_DIRECTORY}/jenkins/pipelines/library/common.groovy")
 
         return common.openzfscish(OPENZFSCI_DIRECTORY, 'create-commit-directory-on-manta', true, [
             ['REPOSITORY', OPENZFS_REPOSITORY],
@@ -303,7 +303,7 @@ def create_pull_directory_on_manta() {
 
     node('master') {
         unstash(name: 'openzfs-ci')
-        def common = load("${OPENZFSCI_DIRECTORY}/jenkins/jobs/pipelines/library/common.groovy")
+        def common = load("${OPENZFSCI_DIRECTORY}/jenkins/pipelines/library/common.groovy")
 
         return common.openzfscish(OPENZFSCI_DIRECTORY, 'create-pull-directory-on-manta', true, [
             ['REPOSITORY', OPENZFS_REPOSITORY],
@@ -319,7 +319,7 @@ def create_commit_status(context, state, description, url = null) {
 
     node('master') {
         unstash(name: 'openzfs-ci')
-        def common = load("${OPENZFSCI_DIRECTORY}/jenkins/jobs/pipelines/library/common.groovy")
+        def common = load("${OPENZFSCI_DIRECTORY}/jenkins/pipelines/library/common.groovy")
 
         common.openzfscish(OPENZFSCI_DIRECTORY, 'create-commit-status', false, [
             ['REPOSITORY', OPENZFS_REPOSITORY],
@@ -338,7 +338,7 @@ def upload_job_console(job, commit_directory, pull_directory) {
 
     node('master') {
         unstash(name: 'openzfs-ci')
-        def common = load("${OPENZFSCI_DIRECTORY}/jenkins/jobs/pipelines/library/common.groovy")
+        def common = load("${OPENZFSCI_DIRECTORY}/jenkins/pipelines/library/common.groovy")
 
         retry(count: 3) {
             return common.openzfscish(OPENZFSCI_DIRECTORY, 'upload-job-console-to-manta', true, [
@@ -355,7 +355,7 @@ def upload_job_console(job, commit_directory, pull_directory) {
 def upload_remote_job_test_results(job, commit_directory, pull_directory, remote_directory) {
     node('master') {
         unstash(name: 'openzfs-ci')
-        def common = load("${OPENZFSCI_DIRECTORY}/jenkins/jobs/pipelines/library/common.groovy")
+        def common = load("${OPENZFSCI_DIRECTORY}/jenkins/pipelines/library/common.groovy")
 
         retry(count: 3) {
             return common.openzfscish(OPENZFSCI_DIRECTORY, 'upload-remote-directory-to-manta', true, [
@@ -374,7 +374,7 @@ def upload_remote_job_test_results(job, commit_directory, pull_directory, remote
 def upload_remote_job_test_logfile(job, commit_directory, pull_directory, logfile) {
     node('master') {
         unstash(name: 'openzfs-ci')
-        def common = load("${OPENZFSCI_DIRECTORY}/jenkins/jobs/pipelines/library/common.groovy")
+        def common = load("${OPENZFSCI_DIRECTORY}/jenkins/pipelines/library/common.groovy")
 
         retry(count: 3) {
             return common.openzfscish(OPENZFSCI_DIRECTORY, 'upload-remote-logfile-to-manta', true, [

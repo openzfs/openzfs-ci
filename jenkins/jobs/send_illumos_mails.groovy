@@ -23,7 +23,7 @@ pipelineJob('send-illumos-mails') {
 
     definition {
         cps {
-            script(readFileFromWorkspace('jenkins/jobs/pipelines/send_illumos_mail.groovy'))
+            script(readFileFromWorkspace('jenkins/pipelines/send_illumos_mail.groovy'))
         }
     }
 }
