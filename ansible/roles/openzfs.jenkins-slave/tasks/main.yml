@@ -4,15 +4,11 @@
     name: staff
     state: present
 
-#
-# The "user" module of Ansible doesn't work for LDAP users, so we don't
-# use it here, and instead use "become_user" as a workaround.
-#
 - name: ensure the jenkins user is present
-  command: "echo jenkins user exists"
-  become: true
-  become_user: jenkins
-  changed_when: false
+  user:
+    name: jenkins
+    group: staff
+    state: present
 
 - name: ensure jenkins user has password-less sudo access
   lineinfile:
