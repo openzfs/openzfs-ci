@@ -39,7 +39,7 @@ job('regression-steps/01-create-builder') {
         env('DCENTER_IMAGE', '${DCENTER_IMAGE}')
         env('DCENTER_GUEST', '${BUILDER}')
 
-        env('EXTRA_VARS', 'jenkins_name=${BUILDER} jenkins_master=${JENKINS_URL}')
+        env('EXTRA_VARS', 'jenkins_slave_name=${BUILDER} jenkins_master_url=${JENKINS_URL}')
         env('ROLES', 'openzfs.build-slave openzfs.jenkins-slave')
         env('WAIT_FOR_SSH', 'yes')
     }

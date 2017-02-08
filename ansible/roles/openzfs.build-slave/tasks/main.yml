@@ -49,4 +49,7 @@
     src: "{{ item.src }}"
     state: "link"
   with_items:
-    - { path: /usr/bin/dmake, src: /opt/sunstudio12.1/bin/dmake }
+    - path: /usr/bin/dmake
+      src: /opt/sunstudio12.1/bin/dmake
+    - path: /usr/bin/easy_install
+      src: /usr/lib/python2.6/vendor-packages/easy_install

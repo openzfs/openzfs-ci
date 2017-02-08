@@ -57,7 +57,7 @@ job('regression-steps/08-create-testers') {
 
         environmentVariables {
             env('DCENTER_GUEST', '${ZLOOP_TESTER}')
-            env('EXTRA_VARS', 'jenkins_name=${ZLOOP_TESTER} jenkins_master=${JENKINS_URL}')
+            env('EXTRA_VARS', 'jenkins_slave_name=${ZLOOP_TESTER} jenkins_master_url=${JENKINS_URL}')
         }
 
         shell('${OPENZFSCI_DIRECTORY}/jenkins/sh/ansible-deploy-roles/ansible-deploy-roles.sh')
@@ -71,7 +71,7 @@ job('regression-steps/08-create-testers') {
 
         environmentVariables {
             env('DCENTER_GUEST', '${ZFSTEST_TESTER}')
-            env('EXTRA_VARS', 'jenkins_name=${ZFSTEST_TESTER} jenkins_master=${JENKINS_URL}')
+            env('EXTRA_VARS', 'jenkins_slave_name=${ZFSTEST_TESTER} jenkins_master_url=${JENKINS_URL}')
         }
 
         shell('${OPENZFSCI_DIRECTORY}/jenkins/sh/ansible-deploy-roles/ansible-deploy-roles.sh')

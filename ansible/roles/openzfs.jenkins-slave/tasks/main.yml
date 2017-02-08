@@ -1,19 +1,25 @@
 ---
-- name: ensure the staff group is present
+- name: assert required variables are defined
+  assert:
+    that:
+      - jenkins_slave_name != "example-slave-name"
+      - jenkins_master_url != "http://jenkins.example.com"
+
+- name: ensure the jenkins group is present
   group:
-    name: staff
+    name: "{{ jenkins_group }}"
     state: present
 
 - name: ensure the jenkins user is present
   user:
-    name: jenkins
-    group: staff
+    name: "{{ jenkins_user }}"
+    group: "{{ jenkins_group }}"
     state: present
 
 - name: ensure jenkins user has password-less sudo access
   lineinfile:
-    dest: /etc/sudoers.d/jenkins
-    line: "jenkins ALL=(ALL) NOPASSWD: ALL"
+    dest: "/etc/sudoers.d/{{ jenkins_user }}"
+    line: "{{ jenkins_user }} ALL=(ALL) NOPASSWD: ALL"
     owner: root
     group: root
     mode: 0644
@@ -30,61 +36,69 @@
 - name: create jenkins directories
   file:
     path: "{{ item }}"
-    owner: jenkins
-    group: staff
+    owner: "{{ jenkins_user }}"
+    group: "{{ jenkins_group }}"
     state: directory
     mode: 0755
   with_items:
-    - "{{ jenkins_bin }}"
-    - "{{ jenkins_log }}"
-    - "{{ jenkins_fsroot }}"
+    - "{{ jenkins_directory }}"
+    - "{{ jenkins_directory }}/root"
 
-#
-# We store a local copy of the swarm client in the repository to eliminate
-# our dependency from the upstream source. The file was downloaded from:
-#
-#     https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/swarm-client/2.2/swarm-client-2.2-jar-with-dependencies.jar
-#
-- name: copy swarm client
-  copy:
-    src: opt/jenkins/swarm-client.jar
-    dest: "{{ jenkins_bin }}/swarm-client.jar"
-    owner: jenkins
-    group: staff
+- name: download necessary JNLP jars
+  get_url:
+    url: "{{ jenkins_master_url }}/jnlpJars/{{ item }}"
+    dest: "{{ jenkins_directory }}/{{ item }}"
     mode: 0644
+    owner: "{{ jenkins_user }}"
+    group: "{{ jenkins_group }}"
+  with_items:
+    - jenkins-cli.jar
+    - slave.jar
 
-- name: copy jenkins swarm connect script
+- name: copy jenkins slave connect templates
   template:
-    src: opt/jenkins/jenkins-swarm-connect.j2
-    dest: "{{ jenkins_bin }}/jenkins-swarm-connect"
+    src: "var/jenkins/{{ item }}.j2"
+    dest: "{{ jenkins_directory }}/{{ item }}"
     mode: 0755
-    owner: jenkins
-    group: staff
-  when: jenkins_name is defined
+    owner: "{{ jenkins_user }}"
+    group: "{{ jenkins_group }}"
+  with_items:
+    - jenkins-slave-config.xml
+    - jenkins-slave-connect
 
-- name: create SMF service manifest for swarm client
-  template:
-    src: var/svc/manifest/application/jenkins-swarm-client.xml.j2
-    dest: /var/svc/manifest/application/jenkins-swarm-client.xml
-    mode: 0444
+- name: ensure supervisord package is present
+  easy_install:
+    name: supervisor
+    state: latest
+
+- name: copy supervisord configuration file
+  copy:
+    dest: '/etc/supervisord.conf'
     owner: root
     group: root
-  when: jenkins_name is defined and ansible_system == "SunOS"
+    mode: 0644
+    content: |
+      [unix_http_server]
+      file=/var/run/supervisor.sock
 
-- name: import swarm client service and connect to Jenkins master
-  command: >
-    /usr/sbin/svccfg import
-    /var/svc/manifest/application/jenkins-swarm-client.xml
-  when: jenkins_name is defined and ansible_system == "SunOS"
+      [supervisord]
+      logfile=/var/log/supervisord.log
+      pidfile=/var/run/supervisord.pid
 
-- name: enable the swarm service for the life of the system
-  command: "/usr/sbin/svcadm enable -trs jenkins-swarm-client"
-  when: jenkins_name is defined and ansible_system == "SunOS"
+      [rpcinterface:supervisor]
+      supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
 
-- name: execute jenkins swarm connect script
-  become: true
-  become_user: jenkins
-  command: "{{ jenkins_bin }}/jenkins-swarm-connect"
-  async: 604800
-  poll: 0
-  when: jenkins_name is defined and ansible_system != "SunOS"
+      [supervisorctl]
+      serverurl=unix:///var/run/supervisor.sock
+
+      [program:jenkins-slave]
+      command={{ jenkins_directory }}/jenkins-slave-connect
+      user=jenkins
+      autostart=true
+      redirect_stderr=true
+      stdout_logfile=/var/log/jenkins-slave.log
+
+- name: start supervisord
+  command: supervisord -c /etc/supervisord.conf
+  args:
+    creates: /var/run/supervisor.sock

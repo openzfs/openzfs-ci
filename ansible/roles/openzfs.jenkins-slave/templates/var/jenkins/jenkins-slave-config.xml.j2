@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<slave>
+  <name>{{ jenkins_slave_name }}</name>
+  <remoteFS>{{ jenkins_directory }}/root</remoteFS>
+  <numExecutors>{{ jenkins_slave_executors }}</numExecutors>
+  <mode>{{ jenkins_slave_mode }}</mode>
+  <retentionStrategy class="hudson.slaves.RetentionStrategy$Always"/>
+  <launcher class="hudson.slaves.JNLPLauncher"/>
+  <label>{{ jenkins_slave_label }}</label>
+  <nodeProperties/>
+</slave>

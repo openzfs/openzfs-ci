@@ -1,0 +1,20 @@
+#!/bin/bash
+
+function cleanup
+{
+    {{ java_bin_path }} \
+        -jar "{{ jenkins_directory }}/jenkins-cli.jar" \
+        -s "{{ jenkins_master_url }}" \
+        delete-node "{{ jenkins_slave_name }}"
+}
+
+trap cleanup EXIT
+
+{{ java_bin_path }} \
+    -jar "{{ jenkins_directory }}/jenkins-cli.jar" \
+    -s "{{ jenkins_master_url }}" \
+    create-node < "{{ jenkins_directory }}/jenkins-slave-config.xml"
+
+{{ java_bin_path }} \
+    -jar "{{ jenkins_directory }}/slave.jar" \
+    -jnlpUrl "{{ jenkins_master_url }}/computer/{{ jenkins_slave_name }}/slave-agent.jnlp"
