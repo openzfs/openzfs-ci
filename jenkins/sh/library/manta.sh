@@ -83,7 +83,7 @@ function manta_get_next_number_for_directory
         # To be defensive, we double check that the value returned by
         # the "get_directory_number" function is an integer.
         #
-        echo "$number" | log_must egrep -q '^[0-9]$'
+        echo "$number" | log_must egrep -q '^[0-9]+$'
     else
         #
         # If the "get_directory_number" function returns the empty
