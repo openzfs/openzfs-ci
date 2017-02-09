@@ -61,4 +61,60 @@ function check_env
     return 0
 }
 
+function log_must_ssh
+{
+    #
+    # It's arguable whether it's "good" to use "magic environment
+    # variables" to pass information into this function, vs. function
+    # parameters; for now, use environment variables since the consumers
+    # already expect this behavior.
+    #
+    check_env HOST USER PASS
+
+    #
+    # We need to be careful not to use "log_must" with "echo" below, as
+    # that could leak the password (print to whatever happened to be
+    # capturing the output of this function; e.g. a Jenkins job log).
+    #
+    echo "$PASS" | log_must sshpass ssh \
+        -o UserKnownHostsFile=/dev/null \
+        -o StrictHostKeyChecking=no \
+        "$USER@$HOST" "$@"
+}
+
+function wait_for_ssh
+{
+    local INVENTORY="$1"
+    local PLAYBOOK="$2"
+
+    #
+    # Again, just like with "log_mush_ssh" above; perhaps these
+    # shouldn't be environment variables, but for now, this is the
+    # simplest/fastest way to retro-fit the existing consumers.
+    #
+    check_env HOST USER PASS INVENTORY PLAYBOOK
+
+    #
+    # The tabs below aren't a mistake, that's a requirement of using a
+    # heredoc with indentation.
+    #
+
+    log_must cat > "$INVENTORY" <<-EOF
+	$HOST ansible_ssh_user="$USER" ansible_ssh_pass="$PASS"
+	EOF
+
+    log_must cat > "$PLAYBOOK" <<-EOF
+	---
+	- hosts: localhost
+	  tasks:
+	    - wait_for:
+	        host: $HOST
+	        port: 22
+	        state: started
+	        timeout: 1800
+	EOF
+
+    log_must ansible-playbook -vvvv -i "$INVENTORY" "$PLAYBOOK" >&2
+}
+
 # vim: tabstop=4 softtabstop=4 shiftwidth=4 expandtab textwidth=72 colorcolumn=80
