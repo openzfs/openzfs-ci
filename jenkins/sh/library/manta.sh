@@ -98,4 +98,85 @@ function manta_get_next_number_for_directory
     echo $((number + 1))
 }
 
+function manta_upload_remote_directory
+{
+    local REMOTE_DIRECTORY="$1"
+    local MANTA_FILE="$2"
+
+    check_env HOST USER PASS REMOTE_DIRECTORY MANTA_FILE
+
+    #
+    # We inject the pv(1) (pipe viewer) utility in between the stream so
+    # we can output statistics about the speed of the transfer.
+    #
+    # By default, pv(1) will print carriage returns instead of newline
+    # characters each time it updates the statistics it's showing. It
+    # does this so that it can continually update the output inline,
+    # instead of printing a new line for each update, when it is run
+    # interactively from the command line.
+    #
+    # Unfortunately, Jenkins does not handle carriage returns the same
+    # way it does new lines. The "console" page for a job will only be
+    # updated when a newline is printed. Thus, as pv(1) sends updates,
+    # these will not get propagated to the job's "console" page until
+    # the stream completes, and a new line is printed. This essentially
+    # defeats the purpose of using pv(1) at all, since the point is to
+    # periodically display output as feedback to let the user know the
+    # transfer is progressing.
+    #
+    # To work around this limitation, we pipe the output from pv(1) into
+    # tr(1) and replace any carriage returns with newlines; this will
+    # achieve the desired behavior with each update from pv(1) being
+    # immediately displayed on a new line in the Jenkins job's "console"
+    # page.
+
+    #
+    # Additionally, we can't simply pipe the output from pv(1) (which is
+    # printed on stderr) directly, since we're already using a pipe to
+    # transfer the data from the remote host to "mput". If we simply
+    # redirected the stderr from pv(1) to stdout, that output would end
+    # up getting incorrectly consumed by "mput". As a result, we have to
+    # use groups (the "{" and "}") and complicated redirection to tease
+    # the output from pv(1), and pipe only that data into tr(1); leaving
+    # the data from the remote host alone, so that it can get passed to
+    # "mput" as we need.
+    #
+    # Thus, we redirect the stderr from the pv(1) command to FD 3. Then,
+    # outside of the group and after the data from the remote host has
+    # been consumed by "mput", we redirect the data from pv(1) back to
+    # stdout, such that it can be piped into tr(1) and printed to the
+    # Jenkins "console" page.
+    #
+    # The last remaining bit to explain is the usage of stdbuf(1). We
+    # need to use this to prevent bash from buffering the output of
+    # tr(1). Without this command, the lines from pv(1) won't get
+    # immediately printed to the Jenkins job's "console" page. Instead,
+    # multiple lines would get batched up and all printed at the same
+    # time, instead of each line being printed to the "console" page as
+    # they are emitted from pv(1). By using stdbuf(1), we prevent this
+    # buffering/batching of multiple lines from occurring.
+    #
+    { log_must_ssh "gtar -C '$REMOTE_DIRECTORY' -cf - . | xz -9e --stdout -" | \
+        pv -fi 15 2>&3 | \
+        log_must mput "$MANTA_FILE"; } 3>&1 | \
+        stdbuf -oL -eL tr '\r' '\n' >&2
+}
+
+function manta_upload_remote_file
+{
+    local REMOTE_FILE="$1"
+    local MANTA_FILE="$2"
+
+    check_env HOST USER PASS REMOTE_FILE MANTA_FILE
+
+    #
+    # See the comment in "manta_upload_remote_directory" above for an
+    # explanation of the complexity here.
+    #
+    { log_must_ssh "cat $REMOTE_FILE" | \
+        pv -fi 15 2>&3 | \
+        log_must mput "$MANTA_FILE"; } 3>&1 | \
+        stdbuf -oL -eL tr '\r' '\n' >&2
+}
+
 # vim: tabstop=4 softtabstop=4 shiftwidth=4 expandtab textwidth=72 colorcolumn=80

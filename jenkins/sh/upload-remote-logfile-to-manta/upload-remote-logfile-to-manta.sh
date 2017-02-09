@@ -38,10 +38,7 @@ log_must_ssh "test -f $REMOTE_LOGFILE"
 
 FILE="${JOB_BASE_NAME}.log"
 
-{ log_must_ssh "cat $REMOTE_LOGFILE" | \
-    pv -fi 15 2>&3 | \
-    log_must mput "/$COMMIT_DIRECTORY/$FILE"; } 3>&1 | \
-    stdbuf -oL -eL tr '\r' '\n' >&2
+manta_upload_remote_file "$REMOTE_LOGFILE" "/$COMMIT_DIRECTORY/$FILE"
 
 if [[ -n "$PULL_DIRECTORY" ]]; then
     log_must mln "/$COMMIT_DIRECTORY/$FILE" "/$PULL_DIRECTORY/$FILE"
