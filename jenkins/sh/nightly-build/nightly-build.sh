@@ -110,26 +110,36 @@ log_must wget --quiet \
 log_must tar xjpf on-closed-bins.i386.tar.bz2
 log_must tar xjpf on-closed-bins-nd.i386.tar.bz2
 
-log_must cp usr/src/tools/env/illumos.sh .
+if [[ -f /opt/onbld/env/omnios-illumos-gate ]]; then
+    #
+    # We're building on an OmniOS based system, so use the provided
+    # illumos.sh environment file.
+    #
+    log_must cp /opt/onbld/env/omnios-illumos-gate illumos.sh
+else
+    #
+    # If this isn't an OmniOS system, the assumption is this is an
+    # OpenIndiana based system. In which case, use the illumos.sh
+    # environment file from the respository, and provided some
+    # OpenIndiana specific customizations.
+    #
+    log_must cp usr/src/tools/env/illumos.sh illumos.sh
+
+    PKGVERS_BRANCH=$(pkg info  -r pkg://openindiana.org/SUNWcs | \
+                     awk '$1 == "Branch:" {print $2}')
+
+    log_must nightly_env_set_var "PKGVERS_BRANCH" "'$PKGVERS_BRANCH'"
+    log_must nightly_env_set_var "ONNV_BUILDNUM" "'$PKGVERS_BRANCH'"
+    log_must nightly_env_set_var "PERL_VERSION" "5.22"
+    log_must nightly_env_set_var "PERL_PKGVERS" "-522"
+fi
 
 log_must nightly_env_set_var "NIGHTLY_OPTIONS"     "$NIGHTLY_OPTIONS"
 log_must nightly_env_set_var "GATE"                "openzfs-nightly"
 log_must nightly_env_set_var "CODEMGR_WS"          "$OPENZFS_DIRECTORY"
 log_must nightly_env_set_var "ON_CLOSED_BINS"      "$OPENZFS_DIRECTORY/closed"
-log_must nightly_env_set_var "ONNV_BUILDNUM"       "151020"
 log_must nightly_env_set_var "ENABLE_IPP_PRINTING" "#"
 log_must nightly_env_set_var "ENABLE_SMB_PRINTING" "#"
-log_must nightly_env_set_var "GCC_ROOT"            "/opt/gcc-4.4.4"
-log_must nightly_env_set_var "CW_GCC_DIR"          "\${GCC_ROOT}/bin"
-log_must nightly_env_set_var "__GNUC"              ""
-log_must nightly_env_set_var "CW_NO_SHADOW"        "1"
-log_must nightly_env_set_var "PERL_VERSION"        "5.16.1"
-log_must nightly_env_set_var "PERL_ARCH"           "i86pc-solaris-thread-multi-64int"
-log_must nightly_env_set_var "PERL_PKGVERS"        ""
-log_must nightly_env_set_var "SPRO_ROOT"           "/opt/sunstudio12.1"
-log_must nightly_env_set_var "ONLY_LINT_DEFS"      "-I/opt/sunstudio12.1/prod/include/lint"
-log_must nightly_env_set_var "PYTHON_VERSION"      "2.6"
-log_must nightly_env_set_var "PYTHON_PKGVERS"      "-26"
 
 log_must cp usr/src/tools/scripts/nightly.sh .
 log_must chmod +x nightly.sh

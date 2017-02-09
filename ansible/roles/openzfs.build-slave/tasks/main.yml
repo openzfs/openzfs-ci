@@ -1,55 +1,45 @@
 ---
-- name: ensure all packages needed to build openzfs are installed
+- name: install build tools meta package (OmniOS)
   pkg5:
     name:
-      - pkg:/archiver/gnu-tar
-      - pkg:/developer/astdev
-      - pkg:/developer/build/make
-      - pkg:/developer/build/onbld
-      - pkg:/developer/gcc44
-      - pkg:/developer/sunstudio12.1
-      - pkg:/developer/gnu-binutils
-      - pkg:/developer/java/jdk
-      - pkg:/developer/lexer/flex
-      - pkg:/developer/object-file
-      - pkg:/developer/parser/bison
-      - pkg:/developer/versioning/mercurial
-      - pkg:/developer/versioning/git
-      - pkg:/developer/library/lint
-      - pkg:/library/glib2
-      - pkg:/library/libxml2
-      - pkg:/library/libxslt
-      - pkg:/library/nspr/header-nspr
-      - pkg:/library/perl-5/xml-parser
-      - pkg:/library/security/trousers
-      - pkg:/runtime/perl
-      - pkg:/runtime/perl-64
-      - pkg:/runtime/perl/module/sun-solaris
-      - pkg:/system/library/math
-      - pkg:/system/library/install
-      - pkg:/system/library/dbus
-      - pkg:/system/library/libdbus
-      - pkg:/system/library/libdbus-glib
-      - pkg:/system/library/mozilla-nss/header-nss
-      - pkg:/system/header
-      - pkg:/system/management/snmp/net-snmp
-      - pkg:/text/gnu-gettext
-      - pkg:/library/python-2/python-extra-26
-      - pkg:/developer/versioning/git
-      - pkg:/system/test/zfstest
-      - pkg:/system/test/fio
+      - pkg:/developer/illumos-tools
   register: result
   until: not result|failed
   retries: 10
   delay: 60
+  when: ansible_distribution == "OmniOS"
 
-- name: ensure symbolic links are present
+#
+# Since OmniOS doesn't install the "easy_install" in any easy to find
+# location (e.g. it's not in the default PATH), we add a symlink so
+# later scripts and Ansible roles will be able to easily find it.
+#
+- name: create easy_install symlink (OmniOS)
   file:
-    path: "{{ item.path }}"
-    src: "{{ item.src }}"
-    state: "link"
-  with_items:
-    - path: /usr/bin/dmake
-      src: /opt/sunstudio12.1/bin/dmake
-    - path: /usr/bin/easy_install
-      src: /usr/lib/python2.6/vendor-packages/easy_install
+    src: /usr/lib/python2.6/vendor-packages/easy_install
+    dest: /usr/bin/easy_install
+    owner: root
+    group: root
+    state: link
+  when: ansible_distribution == "OmniOS"
+
+- name: install build tools meta package (OpenIndiana)
+  pkg5:
+    name:
+      - pkg:/metapackages/build-essential
+  register: result
+  until: not result|failed
+  retries: 10
+  delay: 60
+  when: ansible_distribution == "OpenIndiana"
+
+- name: install additional packages
+  pkg5:
+    name:
+      - pkg:/install/distribution-constructor
+      - pkg:/system/test/fio
+      - pkg:/system/test/zfstest
+  register: result
+  until: not result|failed
+  retries: 10
+  delay: 60

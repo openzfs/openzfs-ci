@@ -79,7 +79,8 @@ function vault_read_ssh_password_dcenter_host
 function verify_dcenter_image
 {
     [[ -n "$1" ]] || die "dcenter image not specified"
-    [[ "$1" == "omnios-r151020" ]] || die "invalid dcenter image specified: $1"
+    [[ "$1" == "omnios-r151020" ]] || [[ "$1" == "oi-hipster" ]] || \
+        die "invalid dcenter image specified: $1"
 }
 
 function vault_read_ssh_user_dcenter_image
