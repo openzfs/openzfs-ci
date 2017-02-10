@@ -302,6 +302,7 @@ def create_commit_directory_on_manta() {
 
         return common.openzfscish(OPENZFSCI_DIRECTORY, 'create-commit-directory-on-manta', true, [
             ['REPOSITORY', OPENZFS_REPOSITORY],
+            ['PREFIX', env.MANTA_DIRECTORY_PREFIX],
             ['COMMIT', OPENZFS_COMMIT],
         ]).trim()
     }
@@ -318,6 +319,7 @@ def create_pull_directory_on_manta() {
 
         return common.openzfscish(OPENZFSCI_DIRECTORY, 'create-pull-directory-on-manta', true, [
             ['REPOSITORY', OPENZFS_REPOSITORY],
+            ['PREFIX', env.MANTA_DIRECTORY_PREFIX],
             ['PULL_NUMBER', OPENZFS_PULL_NUMBER],
         ]).trim()
     }

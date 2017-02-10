@@ -48,7 +48,7 @@ function manta_get_current_number_for_directory
     # filter the results to only the specific parent directory and
     # sub-directories that we care about.
     #
-    log_must mfind -j -t d --mindepth 4 --maxdepth 5 "/$MANTA_USER/public" | \
+    log_must mfind -j -t d --mindepth 5 --maxdepth 6 "/$MANTA_USER/public" | \
     log_must jq -M -r "select( .parent == \"/$1\" ) | .name" | \
     log_must sort -n | \
     log_must tail -n1

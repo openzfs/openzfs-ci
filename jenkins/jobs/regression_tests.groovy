@@ -23,6 +23,8 @@ pipelineJob('00-regression-tests') {
         env('DCENTER_HOST', 'dcenter')
         env('DCENTER_IMAGE', 'omnios-r151020')
         env('DCENTER_EXPIRATION', '1')
+
+        env('MANTA_DIRECTORY_PREFIX', 'test-results')
     }
 
     definition {

@@ -3,12 +3,12 @@
 source "${SH_LIBRARY_PATH}/common.sh"
 source "${SH_LIBRARY_PATH}/manta.sh"
 
-check_env REPOSITORY PULL_NUMBER
+check_env PREFIX REPOSITORY PULL_NUMBER
 
 export HOME=$PWD
 manta_setup_environment
 
-DIRECTORY="$MANTA_USER/public/$REPOSITORY/pull/$PULL_NUMBER"
+DIRECTORY="$MANTA_USER/public/$PREFIX/$REPOSITORY/pull/$PULL_NUMBER"
 NUMBER=$(manta_get_next_number_for_directory "$DIRECTORY")
 
 log_must mmkdir -p "/$DIRECTORY/$NUMBER"

@@ -3,12 +3,12 @@
 source "${SH_LIBRARY_PATH}/common.sh"
 source "${SH_LIBRARY_PATH}/manta.sh"
 
-check_env REPOSITORY COMMIT
+check_env PREFIX REPOSITORY COMMIT
 
 export HOME=$PWD
 manta_setup_environment
 
-DIRECTORY="$MANTA_USER/public/$REPOSITORY/commit/$COMMIT"
+DIRECTORY="$MANTA_USER/public/$PREFIX/$REPOSITORY/commit/$COMMIT"
 NUMBER=$(manta_get_next_number_for_directory "$DIRECTORY")
 
 log_must mmkdir -p "/$DIRECTORY/$NUMBER"
