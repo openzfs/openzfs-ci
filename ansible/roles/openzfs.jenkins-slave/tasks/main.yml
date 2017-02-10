@@ -44,26 +44,28 @@
     - "{{ jenkins_directory }}"
     - "{{ jenkins_directory }}/root"
 
-- name: download necessary JNLP jars
-  get_url:
-    url: "{{ jenkins_master_url }}/jnlpJars/{{ item }}"
-    dest: "{{ jenkins_directory }}/{{ item }}"
-    mode: 0644
+#
+# We store a local copy of the swarm client in the repository to eliminate
+# our dependency from the upstream source. The file was downloaded from:
+#
+#     https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/swarm-client/2.2/swarm-client-2.2-jar-with-dependencies.jar
+#
+- name: copy swarm client
+  copy:
+    src: var/jenkins/swarm-client-2.2-jar-with-dependencies.jar
+    dest: "{{ jenkins_directory }}/swarm-client.jar"
     owner: "{{ jenkins_user }}"
     group: "{{ jenkins_group }}"
-  with_items:
-    - jenkins-cli.jar
-    - slave.jar
+    mode: 0644
 
-- name: copy jenkins slave connect templates
+- name: copy jenkins slave connect script
   template:
-    src: "var/jenkins/{{ item }}.j2"
-    dest: "{{ jenkins_directory }}/{{ item }}"
+    src: "var/jenkins/jenkins-slave-connect.j2"
+    dest: "{{ jenkins_directory }}/jenkins-slave-connect"
     mode: 0755
     owner: "{{ jenkins_user }}"
     group: "{{ jenkins_group }}"
   with_items:
-    - jenkins-slave-config.xml
     - jenkins-slave-connect
 
 - name: ensure supervisord package is present

@@ -1,20 +1,12 @@
 #!/bin/bash
 
-function cleanup
-{
-    {{ java_bin_path }} \
-        -jar "{{ jenkins_directory }}/jenkins-cli.jar" \
-        -s "{{ jenkins_master_url }}" \
-        delete-node "{{ jenkins_slave_name }}"
-}
-
-trap cleanup EXIT
-
 {{ java_bin_path }} \
-    -jar "{{ jenkins_directory }}/jenkins-cli.jar" \
-    -s "{{ jenkins_master_url }}" \
-    create-node < "{{ jenkins_directory }}/jenkins-slave-config.xml"
-
-{{ java_bin_path }} \
-    -jar "{{ jenkins_directory }}/slave.jar" \
-    -jnlpUrl "{{ jenkins_master_url }}/computer/{{ jenkins_slave_name }}/slave-agent.jnlp"
+    -jar "{{ jenkins_directory }}/swarm-client.jar" \
+    -name "{{ jenkins_slave_name }}" \
+    -fsroot "{{ jenkins_directory }}/root" \
+    -master "{{ jenkins_master_url }}" \
+    -labels "{{ jenkins_slave_label }}" \
+    -executors "{{ jenkins_slave_executors }}" \
+    -mode "{{ jenkins_slave_mode | lower }}" \
+    -disableClientsUniqueId \
+    -deleteExistingClients
