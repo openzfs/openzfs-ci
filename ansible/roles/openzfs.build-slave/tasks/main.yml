@@ -36,6 +36,7 @@
 - name: install additional packages
   pkg5:
     name:
+      - pkg:/archiver/gnu-tar
       - pkg:/install/distribution-constructor
       - pkg:/system/test/fio
       - pkg:/system/test/zfstest
