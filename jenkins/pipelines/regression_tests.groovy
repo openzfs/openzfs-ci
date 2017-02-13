@@ -23,8 +23,35 @@ node('master') {
             userRemoteConfigs: [[name: 'origin', url: "https://github.com/${OPENZFSCI_REPOSITORY}"]],
             branches: [[name: OPENZFSCI_BRANCH]],
             extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: OPENZFSCI_DIRECTORY]]])
+    common = load("${OPENZFSCI_DIRECTORY}/jenkins/pipelines/library/common.groovy")
     stash(name: 'openzfs-ci', includes: "${OPENZFSCI_DIRECTORY}/**")
+
+    try {
+        stage('create-builder') {
+            env.BUILDER_INSTANCE_ID = common.openzfscish(OPENZFSCI_DIRECTORY, 'aws-run-instances', true, [:]).trim()
+        }
+
+        if (!env.BUILDER_INSTANCE_ID)
+            error('empty BUILDER_INSTANCE_ID environment variable.')
+
+        stage('ansiblize-builder') {
+            common.openzfscish(OPENZFSCI_DIRECTORY, 'ansible-deploy-roles', false, [
+                ['INSTANCE_IDS', env.BUILDER_INSTANCE_ID],
+                ['EXTRA_VARS', "jenkins_slave_name=${BUILDER} jenkins_master_url=${env.JENKINS_URL}"],
+                ['ROLES', 'openzfs.build-slave openzfs.jenkins-slave'],
+                ['WAIT_FOR_SSH', 'yes'],
+            ])
+        }
+    } finally {
+        if (env.BUILDER_INSTANCE_ID) {
+            common.openzfscish(OPENZFSCI_DIRECTORY, 'aws-terminate-instances', false, [
+                ['INSTANCE_IDS', env.BUILDER_INSTANCE_ID]
+            ])
+        }
+    }
 }
+
+return
 
 try {
     create_commit_status(env.JOB_NAME, 'pending', "OpenZFS testing of commit ${OPENZFS_COMMIT_SHORT} in progress.")

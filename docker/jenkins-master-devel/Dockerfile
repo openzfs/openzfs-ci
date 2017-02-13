@@ -12,7 +12,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN pip install ansible cryptography
+RUN pip install ansible cryptography awscli
 RUN gem install octokit -v 4.3.0 && gem install netrc -v 0.11.0 && \
     gem install mail -v 2.6.4
 RUN npm install manta -g && npm cache clear

@@ -133,4 +133,22 @@ function vault_read_manta_public_key
     vault read -field=value secret/openzfsci/manta/public-key
 }
 
+function vault_read_aws_access_key
+{
+    [[ -z "$VAULT_TOKEN" ]] && vault_setup_environment
+    vault read -field=value secret/openzfsci/aws/access-key
+}
+
+function vault_read_aws_secret_key
+{
+    [[ -z "$VAULT_TOKEN" ]] && vault_setup_environment
+    vault read -field=value secret/openzfsci/aws/secret-key
+}
+
+function vault_read_aws_region
+{
+    [[ -z "$VAULT_TOKEN" ]] && vault_setup_environment
+    vault read -field=value secret/openzfsci/aws/region
+}
+
 # vim: tabstop=4 softtabstop=4 shiftwidth=4 expandtab textwidth=72 colorcolumn=80

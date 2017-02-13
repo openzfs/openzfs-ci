@@ -3,8 +3,17 @@
 source ${SH_LIBRARY_PATH}/common.sh
 source ${SH_LIBRARY_PATH}/vault.sh
 
-check_env OPENZFSCI_DIRECTORY DCENTER_HOST DCENTER_GUEST DCENTER_IMAGE \
-	ROLES WAIT_FOR_SSH
+check_env OPENZFSCI_DIRECTORY INSTANCE_IDS ROLES WAIT_FOR_SSH
+
+export HOME=$PWD
+
+log_must mkdir -p $HOME/.aws
+log_must cat > $HOME/.aws/credentials <<EOF
+[default]
+aws_access_key_id = $(vault_read_aws_access_key)
+aws_secret_access_key = $(vault_read_aws_secret_key)
+region = $(vault_read_aws_region)
+EOF
 
 #
 # The Ansible roles will be contained in the "ansible" directory of the
@@ -14,9 +23,11 @@ check_env OPENZFSCI_DIRECTORY DCENTER_HOST DCENTER_GUEST DCENTER_IMAGE \
 log_must test -d "$OPENZFSCI_DIRECTORY"
 log_must cd "$OPENZFSCI_DIRECTORY/ansible"
 
-HOST="${DCENTER_GUEST}.${DCENTER_HOST}"
-USER=$(vault_read_ssh_user_dcenter_image $DCENTER_IMAGE)
-PASS=$(vault_read_ssh_password_dcenter_image $DCENTER_IMAGE)
+HOST=$(aws ec2 describe-instances --instance-ids $INSTANCE_IDS | \
+    jq -M -r .Reservations[0].Instances[0].PublicIpAddress)
+
+USER=$(vault_read_ssh_user_dcenter_image 'oi-hipster')
+PASS=$(vault_read_ssh_password_dcenter_image 'oi-hipster')
 
 log_must cat > inventory.txt <<EOF
 $HOST ansible_ssh_user="$USER" ansible_ssh_pass="$PASS"
