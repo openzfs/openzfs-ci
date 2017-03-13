@@ -83,7 +83,7 @@ log_must git fetch "$ILLUMOS_REMOTE"
 # integrated into illumos first.
 #
 log_must git checkout -b "illumos-sync" "$OPENZFS_REMOTE/$OPENZFS_BRANCH"
-log_must git merge "$ILLUMOS_REMOTE/$ILLUMOS_BRANCH"
+log_must git merge -Xtheirs "$ILLUMOS_REMOTE/$ILLUMOS_BRANCH"
 log_must git push -f "$GH_USER" "illumos-sync:illumos-sync"
 
 #
