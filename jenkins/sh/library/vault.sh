@@ -35,25 +35,25 @@ function vault_read_smtp_password
 function vault_read_github_user
 {
     [[ -z "$VAULT_TOKEN" ]] && vault_setup_environment
-    vault read -field=value secret/openzfsci/github-api/user
+    vault read -field=value secret/openzfsci/github/user
 }
 
 function vault_read_github_token
 {
     [[ -z "$VAULT_TOKEN" ]] && vault_setup_environment
-    vault read -field=value secret/openzfsci/github-api/token
+    vault read -field=value secret/openzfsci/github/token
 }
 
 function vault_read_github_public_key
 {
     [[ -z "$VAULT_TOKEN" ]] && vault_setup_environment
-    vault read -field=value secret/openzfsci/github-api/public-key
+    vault read -field=value secret/openzfsci/github/public-key
 }
 
 function vault_read_github_private_key
 {
     [[ -z "$VAULT_TOKEN" ]] && vault_setup_environment
-    vault read -field=value secret/openzfsci/github-api/private-key
+    vault read -field=value secret/openzfsci/github/private-key
 }
 
 function verify_dcenter_host

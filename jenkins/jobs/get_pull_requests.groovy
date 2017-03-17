@@ -12,7 +12,7 @@ pipelineJob('get-pull-requests') {
         stringParam('OPENZFSCI_BRANCH', System.getenv('OPENZFSCI_BRANCH'))
         stringParam('OPENZFSCI_DIRECTORY', 'openzfs-ci')
 
-        stringParam('OPENZFS_REPOSITORY', 'openzfs/openzfs')
+        stringParam('OPENZFS_REPOSITORY', System.getenv('OPENZFS_REPOSITORY'))
 
         choiceParam('PULL_REQUEST_VARIANT', ['head', 'merge', 'all'])
         choiceParam('TESTS_ENABLED', ['yes', 'no'])
@@ -35,6 +35,7 @@ pipelineJob('get-pull-requests') {
     definition {
         cps {
             script(readFileFromWorkspace('jenkins/pipelines/get_pull_requests.groovy'))
+            sandbox()
         }
     }
 }

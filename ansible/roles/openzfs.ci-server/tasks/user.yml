@@ -1,0 +1,29 @@
+---
+- name: create user group
+  group:
+    name: ubuntu
+    system: no
+
+- name: create user
+  user:
+    name: ubuntu
+    group: ubuntu
+    shell: /bin/bash
+    home: /home/ubuntu
+    system: no
+
+- name: set home directory permissions
+  file:
+    path: /home/ubuntu
+    state: directory
+    owner: ubuntu
+    group: ubuntu
+    mode: 0755
+
+- name: configure authorized_key
+  authorized_key:
+    user: ubuntu
+    key: "{{ item }}"
+  with_items:
+    - https://github.com/prakashsurya.keys
+    - https://github.com/ahrens.keys

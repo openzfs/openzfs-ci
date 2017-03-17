@@ -4,4 +4,36 @@
 # this ansible issue: https://github.com/ansible/ansible/issues/17495
 #
 dependencies:
-  - { role: angstwad.docker_ubuntu, pip_version_docker_py: latest }
+  - role: angstwad.docker_ubuntu
+    pip_version_docker_py: latest
+    docker_opts: "-g /mnt/docker-host"
+  - role: dev-sec.ssh-hardening
+    ssh_allow_users: ubuntu
+    ssh_print_motd: true
+    ssh_print_last_log: true
+    ssh_use_pam: true
+  - role: tersmitten.fail2ban
+    fail2ban_services:
+      - name: ssh
+        enabled: true
+        port: ssh
+        filter: sshd
+        logpath: /var/log/auth.log
+        maxretry: 6
+  - role: jnv.unattended-upgrades
+    unattended_package_blacklist: []
+    unattended_automatic_reboot: false
+    unattended_remove_unused_dependencies: true
+  - role: franklinkim.ufw
+    ufw_default_input_policy: DROP
+    ufw_default_output_policy: ACCEPT
+    ufw_default_forward_policy: ACCEPT
+    ufw_state: enabled
+    ufw_logging: off
+    ufw_reset: yes
+    ufw_rules:
+      - { rule: allow, port: 22 }
+      - { rule: allow, port: 80 }
+      - { rule: allow, port: 50000 }
+      - { rule: allow, port: 8008 }
+      - { rule: allow, from_ip: 172.17.0.0/16 }

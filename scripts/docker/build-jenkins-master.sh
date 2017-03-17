@@ -7,6 +7,4 @@ if [[ -z "$TOP" ]]; then
 	exit 1
 fi
 
-virtualenv $TOP/ansible/venv
-source $TOP/ansible/venv/bin/activate
-pip install ansible==2.2.2.0
+docker build -t "openzfs/jenkins-master:latest" "$TOP/docker/jenkins-master"

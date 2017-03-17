@@ -26,8 +26,8 @@ pipelineJob('open-illumos-sync-pull') {
          */
         env('OPENZFS_REMOTE', 'origin')
 
-        env('OPENZFS_REPOSITORY', 'openzfs/openzfs')
-        env('OPENZFS_BRANCH', 'master')
+        env('OPENZFS_REPOSITORY', System.getenv('OPENZFS_REPOSITORY'))
+        env('OPENZFS_BRANCH', System.getenv('OPENZFS_BRANCH'))
         env('OPENZFS_DIRECTORY', 'openzfs')
 
         env('ILLUMOS_REPOSITORY', 'illumos/illumos-gate')
@@ -39,6 +39,7 @@ pipelineJob('open-illumos-sync-pull') {
     definition {
         cps {
             script(readFileFromWorkspace('jenkins/pipelines/open_illumos_sync_pull.groovy'))
+            sandbox()
         }
     }
 }

@@ -1,4 +1,4 @@
-FROM jenkinsci/jenkins:2.42
+FROM jenkinsci/jenkins:2.57
 
 USER root
 
@@ -12,7 +12,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN pip install ansible cryptography
+RUN pip install ansible cryptography awscli
 RUN gem install octokit -v 4.3.0 && gem install netrc -v 0.11.0 && \
     gem install mail -v 2.6.4
 RUN npm install manta -g && npm cache clear
@@ -28,7 +28,7 @@ RUN wget -qO /tmp/pup.zip \
     unzip -d /bin /tmp/pup.zip && rm /tmp/pup.zip && chmod 755 /bin/pup
 
 USER jenkins
-COPY init.groovy.d /usr/share/jenkins/ref/init.groovy.d
-COPY openzfs-ci /opt/openzfs-ci
 COPY plugins.txt /usr/share/jenkins/ref/plugins.txt
 RUN /usr/local/bin/plugins.sh /usr/share/jenkins/ref/plugins.txt
+COPY init.groovy.d /usr/share/jenkins/ref/init.groovy.d
+COPY openzfs-ci /opt/openzfs-ci

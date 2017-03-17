@@ -4,8 +4,8 @@ pipelineJob('build-install-media') {
         stringParam('OPENZFSCI_BRANCH', System.getenv('OPENZFSCI_BRANCH'))
         stringParam('OPENZFSCI_DIRECTORY', 'openzfs-ci')
 
-        stringParam('OPENZFS_REPOSITORY', 'openzfs/openzfs')
-        stringParam('OPENZFS_BRANCH', 'master')
+        stringParam('OPENZFS_REPOSITORY', System.getenv('OPENZFS_REPOSITORY'))
+        stringParam('OPENZFS_BRANCH', System.getenv('OPENZFS_BRANCH'))
         stringParam('OPENZFS_DIRECTORY', 'openzfs')
     }
 
@@ -21,6 +21,7 @@ pipelineJob('build-install-media') {
     definition {
         cps {
             script(readFileFromWorkspace('jenkins/pipelines/build_install_media.groovy'))
+            sandbox()
         }
     }
 }

@@ -1,14 +1,3 @@
----
-- name: assert supported distribution
-  assert:
-    that:
-      - ansible_distribution == 'Ubuntu'
-
-- name: create ZFS dataset for vault
-  zfs:
-    name: "zfs/vault"
-    state: present
-
 - name: install vault dependencies
   apt:
     name: '{{ item }}'
@@ -17,13 +6,13 @@
 
 - name: download vault package
   get_url:
-    url: 'https://releases.hashicorp.com/vault/{{ vault_version }}/vault_{{ vault_version }}_linux_amd64.zip'
-    checksum: 'sha256:{{ vault_checksum }}'
+    url: 'https://releases.hashicorp.com/vault/0.6.1/vault_0.6.1_linux_amd64.zip'
+    checksum: 'sha256:4f248214e4e71da68a166de60cc0c1485b194f4a2197da641187b745c8d5b8be'
     dest: /tmp/vault.zip
 
 - name: create vault directory
   file:
-    dest: '/opt/vault-{{ vault_version }}'
+    dest: '/mnt/vault-0.6.1'
     owner: root
     group: root
     state: directory
@@ -31,7 +20,7 @@
 - name: unarchive vault package
   unarchive:
     src: /tmp/vault.zip
-    dest: '/opt/vault-{{ vault_version }}'
+    dest: '/mnt/vault-0.6.1'
     owner: root
     group: root
     mode: 0755
@@ -39,7 +28,7 @@
 
 - name: copy vault openzfsci policy file
   copy:
-    dest: '/opt/vault-{{ vault_version }}/openzfsci-policy.hcl'
+    dest: '/mnt/vault-0.6.1/openzfsci-policy.hcl'
     owner: root
     group: root
     mode: 0644
@@ -50,14 +39,14 @@
 
 - name: copy vault configuration file
   copy:
-    dest: '/opt/vault-{{ vault_version }}/config.hcl'
+    dest: '/mnt/vault-0.6.1/config.hcl'
     owner: root
     group: root
     mode: 0644
     content: |
       disable_mlock = true
       backend "file" {
-        path = "/zfs/vault"
+        path = "/mnt/vault"
       }
 
       /*
@@ -80,14 +69,14 @@
 
 - name: copy vault server script
   copy:
-    dest: '/opt/vault-{{ vault_version }}/vault-server'
+    dest: '/mnt/vault-0.6.1/vault-server'
     owner: root
     group: root
     mode: 0755
     content: |
       #!/bin/sh
       export GOMAXPROCS=$(nproc)
-      /opt/vault/vault server -config=/opt/vault/config.hcl
+      /mnt/vault-0.6.1/vault server -config=/mnt/vault-0.6.1/config.hcl
 
 - name: copy vault systemd service file
   copy:
@@ -97,19 +86,19 @@
     mode: 0755
     content: |
       [Unit]
-      Description=OpenZFS Vault Server
-      After=network.target
+      Description=OpenZFS CI Vault Server
+      After=network.target docker.service
 
       [Service]
-      ExecStart=/opt/vault/vault-server
+      ExecStart=/mnt/vault-0.6.1/vault-server
 
       [Install]
       WantedBy=default.target
 
-- name: configure vault symlink
+- name: configure vault "latest"
   file:
-    src: '/opt/vault-{{ vault_version }}'
-    dest: /opt/vault
+    src: '/mnt/vault-0.6.1'
+    dest: /mnt/vault-latest
     owner: root
     group: root
     state: link

@@ -12,7 +12,7 @@ pipelineJob('send-illumos-mails') {
         stringParam('OPENZFSCI_BRANCH', System.getenv('OPENZFSCI_BRANCH'))
         stringParam('OPENZFSCI_DIRECTORY', 'openzfs-ci')
 
-        stringParam('OPENZFS_REPOSITORY', 'openzfs/openzfs')
+        stringParam('OPENZFS_REPOSITORY', System.getenv('OPENZFS_REPOSITORY'))
     }
 
     if (System.getenv('OPENZFSCI_PRODUCTION').toBoolean()) {
@@ -24,6 +24,7 @@ pipelineJob('send-illumos-mails') {
     definition {
         cps {
             script(readFileFromWorkspace('jenkins/pipelines/send_illumos_mail.groovy'))
+            sandbox()
         }
     }
 }

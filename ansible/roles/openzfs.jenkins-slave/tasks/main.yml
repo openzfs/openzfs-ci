@@ -10,10 +10,20 @@
     name: "{{ jenkins_group }}"
     state: present
 
+- name: create root home directory
+  file:
+    path: /export/home
+    owner: root
+    group: root
+    state: directory
+    mode: 0755
+
 - name: ensure the jenkins user is present
   user:
     name: "{{ jenkins_user }}"
     group: "{{ jenkins_group }}"
+    home: /export/home/jenkins
+    createhome: yes
     state: present
 
 - name: ensure jenkins user has password-less sudo access

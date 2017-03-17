@@ -10,66 +10,35 @@
     name: docker
     system: yes
 
-- name: add docker groups to specified users
+- name: add docker groups to specified user
   user:
-    name: "{{ item }}"
+    name: ubuntu
     append: yes
     groups: docker
-  with_items: "{{ docker_users }}"
-  when: docker_users is defined
 
-#
-# We should also verify the "host-data" dataset is being mounted on
-# /var/lib/docker, and the docker deamon properly detects it and uses
-# the ZFS backend. For now, this is manually configured on the server.
-#
-- name: create docker dataset(s) for conatiners
-  zfs:
-    name: 'zfs/{{ item }}'
-    state: present
-  with_items:
-    - 'docker'
-    - 'docker/host-data'
-    - 'docker/jenkins-master'
-    - 'docker/jenkins-master-devel'
-
-- name: checkout master branch of opezfs-ci repository
+- name: checkout openzfs-ci repository
   git:
-    repo: http://github.com/openzfs/openzfs-ci.git
-    dest: /opt/openzfs-ci/master
+    repo: https://github.com/openzfs/openzfs-ci.git
+    dest: /mnt/openzfs-ci/master
     version: master
     update: yes
+  register: openzfsci
 
-- name: build docker images
-  command: "./scripts/docker/{{ item }}"
+- name: build docker image
+  command: "./scripts/docker/build-jenkins-master.sh"
   args:
-    chdir: /opt/openzfs-ci/master
-  with_items:
-    - build-master.sh
-
-- name: checkout devel branch of opezfs-ci repository
-  git:
-    repo: http://github.com/openzfs/openzfs-ci.git
-    dest: /opt/openzfs-ci/devel
-    version: devel
-    update: yes
-
-- name: build docker images
-  command: "./scripts/docker/{{ item }}"
-  args:
-    chdir: /opt/openzfs-ci/devel
-  with_items:
-    - build-master-devel.sh
+    chdir: /mnt/openzfs-ci/master
+  when: openzfsci.changed
 
 #
-# The jenkins-master container will run the Jenkins process using 1000
-# as the UID for the running process. Thus, we need to properly
-# configure the container's storage such that the Jenkins process will
-# have sufficient privileges to modify files in this dataset.
+# The Jenkins master container will run the Jenkins process using a UID
+# of 1000. Thus, we need to ensure the container's volume is configured
+# correctly, such that the Jenkins process will be able to modify files
+# contained in it.
 #
-- name: configure permissions for docker dataset(s)
+- name: configure permissions of jenkins-master directory
   file:
-    dest: /zfs/docker/jenkins-master
+    dest: /mnt/jenkins-master
     owner: 1000
     group: 1000
     mode: 0755
@@ -77,17 +46,18 @@
 
 #
 # This depends on the docker image already being built and loaded on the
-# server that will run this contianer. We don't yet build and publish
-# these images to any docker image registry, so we don't have a way to
-# pull down this image if it doesn't already exist on the system.
+# server that will run this container. We don't build and publish these
+# images to any docker image registry, so we don't have a way to pull
+# down this image if it doesn't already exist on the system.
 #
-- name: create and run jenkins-master container
+- name: create and run jenkins-master docker container
   docker_container:
     name: jenkins-master
     image: openzfs/jenkins-master
     state: started
     ignore_image: yes
     restart_policy: always
+    security_opts: "apparmor:unconfined"
     ports:
       - 8080:8080
       - 50000:50000
@@ -95,32 +65,40 @@
       - 8080
       - 50000
     volumes:
-      - /zfs/docker/jenkins-master:/var/jenkins_home
+      - "/mnt/jenkins-master:/var/jenkins_home:rw"
     env:
-      JENKINS_URL: "http://{{ inventory_hostname }}:8080"
+      VIRTUAL_HOST: jenkins.open-zfs.org
+      VIRTUAL_PORT: 8080
+      JENKINS_URL: http://jenkins.open-zfs.org
       JENKINS_SLAVE_AGENT_PORT: 50000
-      OPENZFSCI_PRODUCTION: yes
-      OPENZFSCI_REPOSITORY: openzfs/openzfs-ci
-      OPENZFSCI_BRANCH: master
+      OPENZFS_REPOSITORY: openzfs/openzfs
+      OPENZFS_BRANCH: master
 
-- name: create and run jenkins-master-devel container
+- name: create and run cadvisor docker container
   docker_container:
-    name: jenkins-master-devel
-    image: openzfs/jenkins-master-devel
+    name: cadvisor
+    image: google/cadvisor
     state: started
-    ignore_image: yes
     restart_policy: always
+    security_opts: "apparmor:unconfined"
     ports:
-      - 8081:8080
-      - 50001:50001
+      - 8008:8080
     expose:
-      - 8080
-      - 50001
+      - 8008
     volumes:
-      - /zfs/docker/jenkins-master-devel:/var/jenkins_home
-    env:
-      JENKINS_URL: "http://{{ inventory_hostname }}:8081"
-      JENKINS_SLAVE_AGENT_PORT: 50001
-      OPENZFSCI_PRODUCTION: no
-      OPENZFSCI_REPOSITORY: openzfs/openzfs-ci
-      OPENZFSCI_BRANCH: devel
+      - "/:/rootfs:ro"
+      - "/var/run:/var/run:rw"
+      - "/sys:/sys:ro"
+      - "/mnt/docker-host:/var/lib/docker:ro"
+
+- name: create and run nginx-proxy docker container
+  docker_container:
+    name: nginx-proxy
+    image: jwilder/nginx-proxy
+    state: started
+    restart_policy: always
+    security_opts: "apparmor:unconfined"
+    ports:
+      - "80:80"
+    volumes:
+      - "/var/run/docker.sock:/tmp/docker.sock:ro"

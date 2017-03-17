@@ -9,7 +9,7 @@ pipelineJob('00-regression-tests') {
         stringParam('OPENZFSCI_BRANCH', System.getenv('OPENZFSCI_BRANCH'))
         stringParam('OPENZFSCI_DIRECTORY', 'openzfs-ci')
 
-        stringParam('OPENZFS_REPOSITORY', 'openzfs/openzfs')
+        stringParam('OPENZFS_REPOSITORY', System.getenv('OPENZFS_REPOSITORY'))
         stringParam('OPENZFS_DIRECTORY', 'openzfs')
 
         stringParam('OPENZFS_COMMIT')
@@ -30,6 +30,7 @@ pipelineJob('00-regression-tests') {
     definition {
         cps {
             script(readFileFromWorkspace('jenkins/pipelines/regression_tests.groovy'))
+            sandbox()
         }
     }
 }

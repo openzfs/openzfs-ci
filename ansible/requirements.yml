@@ -1,4 +1,16 @@
 ---
 - src: https://github.com/angstwad/docker.ubuntu
   name: angstwad.docker_ubuntu
-  version: v1.1.7
+  version: v2.2.2
+- src: https://github.com/dev-sec/ansible-ssh-hardening
+  name: dev-sec.ssh-hardening
+  version: 3.2.0
+- src: https://github.com/Oefenweb/ansible-fail2ban.git
+  name: tersmitten.fail2ban
+  version: v3.0.2
+- src: https://github.com/jnv/ansible-role-unattended-upgrades
+  name: jnv.unattended-upgrades
+  version: v1.3.0
+- src: https://github.com/weareinteractive/ansible-ufw.git
+  name: franklinkim.ufw
+  version: 1.6.0

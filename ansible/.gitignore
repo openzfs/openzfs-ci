@@ -1,3 +1,7 @@
 venv
 
 roles/angstwad.docker_ubuntu
+roles/dev-sec.ssh-hardening
+roles/franklinkim.ufw
+roles/jnv.unattended-upgrades
+roles/tersmitten.fail2ban

@@ -11,8 +11,8 @@ pipelineJob('get-openzfs-commits') {
         stringParam('OPENZFSCI_REPOSITORY', System.getenv('OPENZFSCI_REPOSITORY'))
         stringParam('OPENZFSCI_BRANCH', System.getenv('OPENZFSCI_BRANCH'))
 
-        stringParam('REPOSITORY', 'openzfs/openzfs')
-        stringParam('BRANCH', 'master')
+        stringParam('REPOSITORY', System.getenv('OPENZFS_REPOSITORY'))
+        stringParam('BRANCH', System.getenv('OPENZFS_BRANCH'))
         stringParam('DIRECTORY', 'openzfs')
     }
 
@@ -33,6 +33,7 @@ pipelineJob('get-openzfs-commits') {
     definition {
         cps {
             script(readFileFromWorkspace('jenkins/pipelines/get_commits.groovy'))
+            sandbox()
         }
     }
 }

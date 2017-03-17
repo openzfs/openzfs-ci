@@ -39,6 +39,9 @@
       - pkg:/archiver/gnu-tar
       - pkg:/install/distribution-constructor
       - pkg:/system/test/fio
+      - pkg:/system/test/libctest
+      - pkg:/system/test/ostest
+      - pkg:/system/test/utiltest
       - pkg:/system/test/zfstest
   register: result
   until: not result|failed

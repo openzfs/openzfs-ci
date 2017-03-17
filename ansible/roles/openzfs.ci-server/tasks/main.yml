@@ -1,6 +1,4 @@
 ---
-- include: hosts.yml
-- include: users.yml
-- include: zfs.yml
-- include: docker.yml # depends on zfs.yml
-- include: vault.yml # depends on zfs.yml
+- include: user.yml
+- include: vault.yml
+- include: docker.yml # depends on user.yml
