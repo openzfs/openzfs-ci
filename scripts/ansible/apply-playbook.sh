@@ -15,5 +15,7 @@ source $TOP/ansible/venv/bin/activate
 
 $TOP/scripts/ansible/pull-dependencies.sh
 
-ansible-playbook -i $TOP/ansible/inventory/production $TOP/ansible/playbook.yml
-
+ansible-playbook \
+	-c paramiko \
+	-i $TOP/ansible/inventory/production \
+	$TOP/ansible/playbook.yml
