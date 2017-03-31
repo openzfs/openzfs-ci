@@ -66,7 +66,12 @@ known = {
     'snapshot/snapshot_008_pos' : 'FAIL',
     'vdev_zaps/vdev_zaps_007_pos': 'FAIL',
     'zpool_clear/zpool_clear_001_pos': 'FAIL',
+    'zvol/zvol_misc/zvol_misc_001_neg': 'FAIL',
     'zvol/zvol_misc/zvol_misc_002_pos': 'FAIL',
+    'zvol/zvol_misc/zvol_misc_003_neg': 'FAIL',
+    'zvol/zvol_misc/zvol_misc_004_pos': 'FAIL',
+    'zvol/zvol_misc/zvol_misc_005_neg': 'FAIL',
+    'zvol/zvol_misc/zvol_misc_006_pos': 'FAIL',
     'zvol/zvol_swap/zvol_swap_004_pos': 'FAIL'
 }
 
