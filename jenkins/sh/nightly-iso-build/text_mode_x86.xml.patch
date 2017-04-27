@@ -1,5 +1,5 @@
---- text_mode_x86.xml	Tue Feb 14 00:00:00 2017
-+++ text_mode_x86.xml	Tue Feb 14 00:00:00 2017
+--- text_mode_x86.xml	Thu Apr 27 00:00:00 2017
++++ text_mode_x86.xml	Thu Apr 27 00:00:00 2017
 @@ -192,8 +192,8 @@
  		-->
  		<pkg_repo_default_authority>
@@ -54,3 +54,18 @@
  		<!--
  		     list of packages used to form the installed image
  		-->
+@@ -269,6 +257,14 @@
+ 			<pkg name="pkg:/server_install"/>
+ 			<pkg name="pkg:/system/install/text-install"/>
+ 			<pkg name="pkg:/system/install/media/internal"/>
++			<pkg name="pkg:/metapackages/build-essential"/>
++			<pkg name="pkg:/install/distribution-constructor"/>
++			<pkg name="pkg:/archiver/gnu-tar"/>
++			<pkg name="pkg:/system/test/fio"/>
++			<pkg name="pkg:/system/test/libctest"/>
++			<pkg name="pkg:/system/test/ostest"/>
++			<pkg name="pkg:/system/test/utiltest"/>
++			<pkg name="pkg:/system/test/zfstest"/>
+ 		</packages>
+ <!--
+      Items below this line are rarely configured
