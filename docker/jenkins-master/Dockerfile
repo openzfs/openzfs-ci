@@ -1,4 +1,4 @@
-FROM jenkins/jenkins:2.90
+FROM jenkins/jenkins:2.92
 
 USER root
 
