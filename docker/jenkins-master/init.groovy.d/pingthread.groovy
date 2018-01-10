@@ -1,7 +1,10 @@
 import jenkins.model.*
 
-// Bump these to 10x the default values to try and alleviate Ping Thread timeouts.
-System.setProperty("hudson.slaves.ChannelPinger.pingIntervalSeconds", "3000")
-System.setProperty("hudson.slaves.ChannelPinger.pingTimeoutSeconds", "2400")
+/*
+ * Disable the Ping Thread to alleviate timeout with slaves, and resultant test failures.
+ * See also: https://wiki.jenkins.io/display/JENKINS/Ping+Thread
+ */
+Jenkins.instance.injector.getInstance(hudson.slaves.ChannelPinger.class).@pingIntervalSeconds = -1
+Jenkins.instance.injector.getInstance(hudson.slaves.ChannelPinger.class).@pingTimeoutSeconds = -1
 
 // vim: tabstop=4 shiftwidth=4 expandtab textwidth=112 colorcolumn=120
