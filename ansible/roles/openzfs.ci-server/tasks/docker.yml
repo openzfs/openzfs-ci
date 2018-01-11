@@ -73,6 +73,7 @@
       JENKINS_SLAVE_AGENT_PORT: 50000
       OPENZFS_REPOSITORY: openzfs/openzfs
       OPENZFS_BRANCH: master
+      JAVA_OPTS: "-Dhudson.remoting.Launcher.pingIntervalSec=600"
 
 - name: create and run cadvisor docker container
   docker_container:
